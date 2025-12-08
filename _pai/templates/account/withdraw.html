@@ -1,0 +1,308 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>회원탈퇴 페이지</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+                "Noto Sans KR", sans-serif;
+            background-color: #ffffff;
+        }
+
+        /* ===== 상단 헤더 ===== */
+        .header {
+            width: 100%;
+            height: 70px;
+            padding: 0 40px;
+            border-bottom: 1px solid #e0e4ea;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-text-main {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo-text-sub {
+            font-size: 11px;
+            letter-spacing: 1.2px;
+            color: #2b4a88;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-btn {
+            padding: 9px 20px;
+            border-radius: 4px;
+            border: none;
+            background-color: #243c74;
+            color: #ffffff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .header-btn:hover {
+            opacity: 0.92;
+        }
+
+        /* ===== 메인 콘텐츠 ===== */
+        .page-wrapper {
+            min-height: calc(100vh - 70px);
+            padding: 30px 60px 50px 60px;
+        }
+
+        .page-title {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 12px;
+        }
+
+        .content-box {
+            border: 2px solid #a6b8d9;
+            border-radius: 20px;
+            padding: 30px 45px 60px 45px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .content-box ol {
+            margin-left: 18px;
+        }
+
+        .content-box li {
+            margin-bottom: 12px;
+        }
+
+        .bullet-list {
+            list-style-type: disc;
+            margin-left: 18px;
+            margin-top: 6px;
+        }
+
+        .bullet-list li {
+            margin-bottom: 4px;
+        }
+
+        .withdraw-info {
+            margin-top: 4px;
+            margin-left: 4px;
+        }
+
+        .button-area {
+            text-align: center;
+            margin-top: 32px;
+        }
+
+        .withdraw-btn {
+            display: inline-block;
+            min-width: 180px;
+            padding: 12px 40px;
+            border-radius: 24px;
+            border: none;
+            background-color: #243c74;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .withdraw-btn:hover {
+            opacity: 0.93;
+        }
+
+        /* ===== 모달 ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.35);
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background-color: #ffffff;
+            border-radius: 22px;
+            padding: 40px 55px 32px 55px;
+            text-align: center;
+            min-width: 420px;
+            max-width: 520px;
+            border: 1px solid #444;
+        }
+
+        .modal-text {
+            font-size: 17px;
+            line-height: 1.6;
+            margin-bottom: 26px;
+        }
+
+        .modal-btn-area {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        .modal-btn {
+            min-width: 140px;
+            padding: 11px 20px;
+            border-radius: 25px;
+            border: none;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .modal-confirm {
+            background-color: #243c74;
+            color: #fff;
+        }
+
+        .modal-cancel {
+            background-color: #4f4f4f;
+            color: #fff;
+        }
+
+        .modal-btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 상단 헤더 -->
+    <header class="header">
+        <div class="header-left">
+            <!-- 로고 이미지 쓰고 싶으면 아래 img 주석 해제해서 static 경로에 맞게 변경 -->
+            <!-- <img src="{% static 'img/pai_logo.png' %}" alt="P.ai 로고" style="height:40px;"> -->
+            <div>
+                <div class="logo-text-main">Pai</div>
+                <div class="logo-text-sub">PATENT AI</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <button type="button" class="header-btn">채팅하기</button>
+            <button type="button" class="header-btn">로그아웃</button>
+        </div>
+    </header>
+
+    <!-- 메인 내용 -->
+    <div class="page-wrapper">
+        <div class="page-title">회원탈퇴 페이지</div>
+
+        <div class="content-box">
+            <ol>
+                <li>
+                    탈퇴 시 처리되는 내용
+                    <ul class="bullet-list">
+                        <li>계정 정보 및 개인 데이터는 관련 법령을 준수하여 즉시 삭제 또는 일정 기간 보관 후 삭제됩니다.</li>
+                        <li>이용자가 직접 생성한 검색 기록, 질의 기록 등은 서비스 품질 향상 목적의 비식별 데이터로만 유지될 수 있습니다.</li>
+                        <li>탈퇴 후에는 동일 계정 정보로 복구가 불가능합니다.</li>
+                    </ul>
+                </li>
+
+                <li>
+                    서비스 이용에 대한 책임
+                    <ul class="bullet-list">
+                        <li>Pai는 정보 제공 목적의 AI 기반 서비스로, 제공되는 분석 결과·검색 정보 등은 법적 효력이나 책임을 갖지 않습니다.</li>
+                        <li>회원 탈퇴 여부와 관계없이, 과거 Pai 서비스 이용을 기반으로 사용자가 내린 판단·결과에 대해 Pai는 책임을 부담하지 않습니다.</li>
+                    </ul>
+                </li>
+
+                <li>
+                    탈퇴 전 확인
+                    <ul class="bullet-list">
+                        <li>탈퇴 후에는 검색 결과 등 모든 개인화 정보가 삭제됩니다.</li>
+                        <li>서비스 이용 이력은 통계 목적의 비식별 처리된 데이터로만 유지될 수 있습니다.</li>
+                    </ul>
+                </li>
+
+                <li>
+                    진행 방법
+                    <div class="withdraw-info">
+                        아래 버튼을 누르면 회원탈퇴가 완료됩니다.<br>
+                        탈퇴 후 즉시 로그아웃되며 서비스 이용이 제한됩니다.
+                    </div>
+                </li>
+            </ol>
+
+            <div class="button-area">
+                <button type="button" class="withdraw-btn" id="open-modal-btn">
+                    회원탈퇴하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 탈퇴 확인 모달 -->
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-box">
+            <p class="modal-text">
+                정말 탈퇴하시겠습니까?<br>
+                탈퇴 후에는 모든 데이터가 삭제되며 복구할 수 없습니다.
+            </p>
+
+            <div class="modal-btn-area">
+                <button type="button" class="modal-btn modal-confirm" id="confirm-btn">
+                    탈퇴하기
+                </button>
+                <button type="button" class="modal-btn modal-cancel" id="cancel-btn">
+                    아니요
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const openModalBtn = document.getElementById('open-modal-btn');
+        const confirmModal = document.getElementById('confirm-modal');
+        const confirmBtn = document.getElementById('confirm-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+
+        // 회원탈퇴하기 버튼 → 모달 열기
+        openModalBtn.addEventListener('click', function () {
+            confirmModal.style.display = 'flex';
+        });
+
+        // 아니요 → 모달 닫기
+        cancelBtn.addEventListener('click', function () {
+            confirmModal.style.display = 'none';
+        });
+
+        // 바깥 검은 영역 클릭 → 모달 닫기
+        confirmModal.addEventListener('click', function (event) {
+            if (event.target === confirmModal) {
+                confirmModal.style.display = 'none';
+            }
+        });
+
+        // 모달 안 탈퇴하기 → 실제 탈퇴 로직 자리 (지금은 알림만)
+        confirmBtn.addEventListener('click', function () {
+            alert('탈퇴 처리가 되었다고 가정! (나중에 실제 기능 연결)');
+            confirmModal.style.display = 'none';
+        });
+    </script>
+</body>
+
+</html>

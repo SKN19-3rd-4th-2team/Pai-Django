@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: white;
+        }
+
+        .signup-container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            width: 300px;
+            border: 2px solid #445A85;
+        }
+
+        h2 {
+            color: #445A85;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 20px;
+            max-width: 150px;
+            height: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            color: #445A85;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #445A85;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #273E6A;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="signup-container">
+        <img src="{% static '/images/logo_image.png' %}" alt="로고" class="logo">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="userid">ID</label>
+                <input type="text" id="userid" name="userid" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="username">이름</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <button type="submit">회원가입</button>
+        </form>
+    </div>
+</body>
+
+</html>

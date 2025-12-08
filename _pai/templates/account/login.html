@@ -1,0 +1,135 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patent AI - Login</title>
+
+    <style>
+        body {
+            background-color: #ffffff;
+            font-family: 'Pretendard', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            width: 430px;
+            padding: 40px 30px;
+            border: 2px solid #2d396b;
+            border-radius: 30px;
+            text-align: center;
+        }
+
+        .logo-img {
+            width: 200px;
+            margin-bottom: 20px;
+        }
+
+        .input-box {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 13px;
+            border-radius: 25px;
+            border: 1px solid #c9c9c9;
+            margin: 10px 0;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 25px;
+            background-color: #3f4a78;
+            color: white;
+            border: none;
+            font-size: 16px;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 25px;
+            background-color: #f2f2f2;
+            color: #3f3f3f;
+            border: none;
+            font-size: 15px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .line-wrap {
+            display: flex;
+            align-items: center;
+            margin: 18px 0;
+        }
+
+        .line {
+            flex-grow: 1;
+            height: 1px;
+            background-color: #cfcfcf;
+        }
+
+        .guest-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 25px;
+            background-color: #e8edff;
+            color: #3f4a78;
+            border: none;
+            font-size: 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    {% if error %}
+    <script>
+        alert("{{ error }}");
+    </script>
+    {% endif %}
+
+    <div class="login-container">
+
+        <!-- 로고 -->
+        <img src="{% static 'images/logo_image.png' %}" alt="PAI Logo" class="logo-img">
+
+        <!-- 로그인 Form -->
+        <form method="POST" action="{% url 'account:login' %}"> {# 임시. #}
+            {% csrf_token %}
+
+            <input type="text" name="username" class="input-box" placeholder="ID를 입력하세요." value="{{ username }}">
+            <input type="password" name="password" class="input-box" placeholder="Password를 입력하세요.">
+
+            <button type="submit" class="login-btn">로그인</button>
+        </form>
+
+        <form action="{% url 'account:signup' %}">
+            <button type="submit" class="signup-btn">회원가입</button>
+        </form>
+
+        <div class="line-wrap">
+            <div class="line"></div>
+            <div style="width:20px;"></div>
+            <div class="line"></div>
+        </div>
+
+        <form action="{% url 'account:chat' %}">
+            <button type="submit" class="guest-btn">비회원으로 이용</button>
+        </form>
+    </div>
+
+</body>
+
+</html>
