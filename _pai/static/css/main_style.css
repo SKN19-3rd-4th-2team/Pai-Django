@@ -1,0 +1,236 @@
+@charset "UTF-8";
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
+/* 기본 초기화 */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+
+/* [중요] 부모 요소 높이 설정 (스냅 동작 필수 조건) */
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* 기본 스크롤바 숨김 */
+}
+
+/* --- 1. 헤더 (고정) --- */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-bottom: 1px solid #eee;
+    z-index: 1000;
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 50px;
+    height: 80px;
+}
+
+@media (max-width: 768px) {
+    .header-inner { padding: 15px 20px; }
+}
+
+.logo { width: 100px; height: auto; display: block; }
+.auth-buttons { display: flex; gap: 10px; }
+
+/* 버튼 기본 스타일 */
+.btn { 
+    padding: 10px 24px; 
+    font-size: 18px; 
+    font-weight: 600; 
+    border-radius: 4px; 
+    border: none; 
+    cursor: pointer; 
+    transition: all 0.2s; /* 부드러운 전환 효과 */
+}
+
+/* [수정됨] 헤더 버튼: 호버 효과 추가 */
+.btn-header { 
+    background-color: #4A5B7D; 
+    color: white; 
+    box-shadow: 0 4px 0 #2E3A52; 
+}
+
+/* 마우스 올렸을 때 (Hover) */
+.btn-header:hover {
+    background-color: #3b4c6e; /* 색상 진하게 */
+    transform: translateY(-2px); /* 살짝 위로 뜸 */
+    box-shadow: 0 6px 0 #2E3A52; /* 그림자 길어짐 */
+}
+
+/* 클릭했을 때 (Active) */
+.btn-header:active { 
+    transform: translateY(4px); /* 눌리는 느낌 */
+    box-shadow: none; 
+}
+
+
+/* --- 2. 스크롤 래퍼 --- */
+.snap-wrapper {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- 3. 공통 섹션 스타일 --- */
+.full-section {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    position: relative;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+
+/* --- 4. Hero Section 스타일 --- */
+.hero { background-color: #F8F9FB; }
+
+.hero-container-flex {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+/* [수정됨] 내부 컨텐츠 레이아웃: 왼쪽 패딩 추가로 전체를 오른쪽으로 밈 */
+.hero-content-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 60px;
+    
+    padding-left: 40px; /* [핵심] 전체적으로 오른쪽으로 이동시킴 */
+}
+
+.hero-text { 
+    flex: 1; 
+    max-width: 650px; 
+    text-align: left; 
+}
+
+/* 제목 등 텍스트 스타일 */
+.hero-title { 
+    font-size: 72px; 
+    font-weight: 700; 
+    margin-bottom: 15px; 
+    color: #2c3e50;
+    opacity: 0; animation: fadeInUp 0.8s ease-out forwards; animation-delay: 0.2s; 
+}
+.hero-subtitle { 
+    font-size: 32px; 
+    font-weight: 600; 
+    color: #556677; 
+    margin-bottom: 30px;
+    opacity: 0; animation: fadeInUp 0.8s ease-out forwards; animation-delay: 0.4s;
+}
+.hero-desc { 
+    font-size: 20px; 
+    line-height: 1.7; 
+    color: #4a4a4a; 
+    margin-bottom: 0;
+    opacity: 0; animation: fadeInUp 0.8s ease-out forwards; animation-delay: 0.6s;
+}
+.hero-desc strong { color: #2c3e50; }
+
+/* 시작하기 버튼 */
+.btn-start {
+    display: block;
+    margin: 0 auto; 
+    width: fit-content;
+    background-color: #4A5B7D;
+    color: white;
+    font-size: 24px;
+    font-weight: 800;
+    padding: 15px 60px;
+    border-radius: 50px;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    transition: transform 0.2s, background-color 0.2s;
+    opacity: 0;
+    animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    animation-delay: 0.8s;
+}
+.btn-start:hover { background-color: #3b4c6e; transform: scale(1.05); }
+
+/* 이미지 영역 */
+.hero-image { 
+    flex: 1; 
+    text-align: right; 
+    display: flex; 
+    justify-content: center; 
+    opacity: 0; animation: fadeInRight 1s ease-out forwards; animation-delay: 0.4s;
+}
+.mascot-img { 
+    max-width: 300px; /* 300px 유지 */
+    width: 100%; height: auto; 
+    animation: float 3s ease-in-out infinite; 
+}
+
+
+/* --- 5. Features Section 스타일 --- */
+.features { background-color: #fff; }
+
+.section-title {
+    font-size: 42px;
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 80px;
+    text-align: center;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+.feature-card {
+    background-color: #F5F7FA;
+    padding: 50px 30px;
+    border-radius: 12px;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    opacity: 0; transform: translateY(30px); transition: all 0.6s ease-out; 
+}
+.feature-card.show { opacity: 1; transform: translateY(0); }
+
+.feature-title { font-size: 24px; font-weight: 700; margin-bottom: 25px; color: #2c3e50; }
+.feature-desc { font-size: 18px; color: #555; line-height: 1.6; word-break: keep-all; }
+
+
+/* --- 애니메이션 키프레임 --- */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+    0% { opacity: 0; transform: scale(0.5); }
+    70% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+}
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(50px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
+}
