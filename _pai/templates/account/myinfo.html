@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>내 정보 확인</title>
+</head>
+
+<body>
+    <div class="wrapper">
+        <h1>내 정보 확인</h1>
+
+        <div class="card">
+            <p class="label">ID</p>
+            <p class="value">{{ user_id }}</p>
+
+            <p class="label">Password</p>
+            <p class="value">{{ password }}</p>
+
+            <p class="label">성함</p>
+            <p class="value">{{ nickname }}</p>
+
+            {% if message %}
+            <p class="message">{{ message }}</p>
+            {% endif %}
+
+            <button>수정하기</button>
+        </div>
+    </div>
+</body>
+
+</html>

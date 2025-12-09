@@ -46,3 +46,13 @@ def chat(request):
 
 def withdraw(request):
     return render(request, "account/withdraw.html")
+
+
+def myinfo(request):
+    context = {
+        "user_id": "FantAstIc5",
+        "password": "@@FantAstIc5",
+        "nickname": "판타스틱오",
+        "message": "변경이 완료되었습니다.",
+    }
+    return render(request, "account/myinfo.html", context)

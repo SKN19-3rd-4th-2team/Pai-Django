@@ -122,3 +122,21 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+# settings.py 맨 아래에 추가
+
+# DB 대신 파일 기반 세션 사용 (마이그레이션 불필요)
+SESSION_ENGINE = "django.contrib.sessions.backends.file"
+
+# (선택사항) 브라우저를 닫아도 세션 유지 (여기선 테스트 편의를 위해 설정)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+
+import os  # 상단에 없다면 추가
+
+# ... (기존 설정들) ...
+
+# [수정] 세션 파일을 프로젝트 폴더 내 'sessions' 폴더에 저장
+SESSION_ENGINE = "django.contrib.sessions.backends.file"
+SESSION_FILE_PATH = os.path.join(BASE_DIR, "sessions")  # 여기가 핵심!
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False

@@ -9,4 +9,5 @@ urlpatterns = [
     path("signup/", views.signup, name="signup"),
     path("chat/", views.chat, name="chat"),
     path("withdraw/", views.withdraw, name="withdraw"),
+    path("myinfo/", views.myinfo, name="myinfo"),
 ]
