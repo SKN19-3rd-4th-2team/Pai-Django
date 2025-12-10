@@ -32,7 +32,7 @@ tools = [
 ]
 
 llm = ChatOpenAI(
-    model="gpt-4o",  # 혹은 gpt-4-turbo, gpt-3.5-turbo 등
+    model="gpt-5.1",  # 혹은 gpt-4-turbo, gpt-3.5-turbo 등
     temperature=0,
     api_key=OPENAI_API_KEY,
 )

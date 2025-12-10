@@ -1,43 +1,56 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, logout, login as auth_login
+
+# from django.contrib.auth import logout as auth_logout
 
 from django.http import HttpResponse
 
+from .forms import SignupForm, LoginForm
 
-# Create your views here.
-def login(request):
-    if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-
-        if username == "test" and password == "1234":
-            return redirect("account:chat")  # 성공 시 이동
-
-        else:  # 실패 시
-            return render(
-                request, "account/login.html", {"error": "ID 또는 PW가 틀렸습니다."}
-            )
-
-    return render(request, "account/login.html")
-    # 실제 인증 받을 때
-    # user = authenticate(request, username=username, password=password)
-    # if user:
-    #     login(request, user)
-    #     return redirect('chat')  # 로그인 후 이동할 페이지 (사용자 고유 아이디... 별명? 넘겨서?)
-
-    # else:
-    #     return render(request, "accounts/login.html", {"error": "ID 또는 PW가 틀렸습니다."})
+# 수정 부분: signup(), login()
 
 
+# 회원가입
 def signup(request):
     if request.method == "POST":
-        userid = request.POST.get("userid")
-        password = request.POST.get("password")
-        username = request.POST.get("username")
+        form = SignupForm(request.POST)
 
-        return render(request, "account/signup_success.html", {"username": username})
+        if form.is_valid():
+            user = form.save()  # User 모델에 저장됨 (비밀번호 자동 암호화. sha256)
+            nickname = form.cleaned_data.get("nickname")
 
-    return render(request, "account/signup.html")
+            return render(
+                request, "account/signup_success.html", {"username": nickname}
+            )  # 회원가입 성공 시 success 화면으로 이동
+
+    else:
+        form = SignupForm()
+
+    return render(request, "account/signup.html", {"form": form})
+
+
+# 로그인
+def login(request):
+    if request.method == "POST":
+        form = LoginForm(
+            request, data=request.POST
+        )  # 비밀번호 일치 여부 등을 여기서 모두 django가 확인
+
+        if form.is_valid():  # 유효성 검증 통과 시
+            user = form.get_user()
+            auth_login(request, user)  # 로그인 처리
+            return redirect("chat:chat_interface")  # chat 페이지로 이동. 수정 부분
+
+    else:
+        form = LoginForm()
+
+    return render(request, "account/login.html", {"form": form})
+
+
+# 로그아웃 (버튼 추가 후)
+# def logout(request):
+#     auth_logout(request)
+#     return redirect("")
 
 
 def chat(request):
@@ -56,3 +69,14 @@ def myinfo(request):
         "message": "변경이 완료되었습니다.",
     }
     return render(request, "account/myinfo.html", context)
+
+
+def logout_view(request):
+    """
+    로그아웃 처리:
+    1. 현재 사용자의 세션 데이터를 삭제합니다 (DB의 django_session 테이블에서 제거).
+    2. 브라우저의 sessionid 쿠키도 무효화됩니다.
+    3. 로그인 페이지로 튕겨냅니다.
+    """
+    logout(request)
+    return redirect("account:login")  # 로그인 페이지로 이동

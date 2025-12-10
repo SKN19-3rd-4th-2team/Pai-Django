@@ -3,27 +3,29 @@
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
 
 
-def convert_session_to_langchain_messages(session_history, system_prompt: str = None):
+# llm_module/memory_utils.py
+
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
+
+
+def convert_db_chats_to_langchain(db_chats, system_prompt: str = None):
     """
     [조립]
-    DB/Session(리스트+딕셔너리) -> LangChain Message 객체 리스트로 변환
+    DB QuerySet (Chat 모델 리스트) -> LangChain Message 객체 리스트로 변환
     """
     messages = []
 
-    # 1. 시스템 프롬프트가 있다면 맨 앞에 추가
+    # 1. 시스템 프롬프트 추가
     if system_prompt:
         messages.append(SystemMessage(content=system_prompt))
 
-    # 2. 히스토리 순회하며 객체로 변환
-    for msg in session_history:
-        role = msg.get("role")
-        content = msg.get("content")
-
-        if role == "user":
-            messages.append(HumanMessage(content=content))
-        elif role == "assistant":
-            messages.append(AIMessage(content=content))
-        # tool 메시지 등은 필요시 추가 구현
+    # 2. DB 데이터 순회
+    for chat in db_chats:
+        if chat.type == "HUMAN":
+            messages.append(HumanMessage(content=chat.content))
+        elif chat.type == "AI":
+            messages.append(AIMessage(content=chat.content))
+        # ToolMessage는 필요 시 추가 (현재는 필터링됨)
 
     return messages
 
