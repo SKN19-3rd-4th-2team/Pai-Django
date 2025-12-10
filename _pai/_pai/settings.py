@@ -140,3 +140,5 @@ import os  # 상단에 없다면 추가
 SESSION_ENGINE = "django.contrib.sessions.backends.file"
 SESSION_FILE_PATH = os.path.join(BASE_DIR, "sessions")  # 여기가 핵심!
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+SESSION_COOKIE_AGE = 3600

@@ -63,47 +63,65 @@ def get_current_history(request):
 # 뷰: 채팅 화면
 # =========================================================
 def chat_interface(request):
+    """
+    전체 채팅 페이지 렌더링
+    """
     user = request.user
     selected_history = None
 
-    # 1. 회원인 경우: 과거 기록을 기억하고 불러옴
+    # 1. 채팅 목록 가져오기 (정렬 기준 변경: created_at -> order_num)
     if user.is_authenticated:
-        selected_history = (
-            ChatHistory.objects.filter(user=user).order_by("-created_at").first()
-        )
-
-        if not selected_history:
-            selected_history = ChatHistory.objects.create(
-                user=user, order_num=1, description="새로운 대화"
-            )
-
-    # 2. 비회원인 경우: 접속할 때마다 '무조건' 새로 만듦 (과거 내역 조회 X)
+        # [수정] order_num 내림차순 정렬 (높은 번호가 위로)
+        history_list = ChatHistory.objects.filter(user=user).order_by("-order_num")
     else:
-        # 세션 키 확보 (이건 보안 검증용으로 필수)
+        # 비회원 세션 처리
         if not request.session.session_key:
             request.session.save()
-
         session_id = request.session.session_key
 
-        # [핵심] filter().first()로 찾지 않고, 그냥 바로 create() 해버림
-        # 이렇게 하면 새로고침 할 때마다 깨끗한 새 방이 열림
-        selected_history = ChatHistory.objects.create(
-            user=None, session_id=session_id, order_num=1, description="게스트 대화"
-        )
+        # [수정] order_num 내림차순 정렬
+        history_list = ChatHistory.objects.filter(
+            session_id=session_id, user__isnull=True
+        ).order_by("-order_num")
 
-    # 3. 선택된(혹은 방금 만든) 방의 대화 내용 가져오기
-    # 비회원은 방금 만들었으니 당연히 빈 리스트가 됨 -> 화면 초기화 효과
+    # 2. 특정 채팅방 선택 로직 (URL 파라미터 ?history_id=123)
+    target_id = request.GET.get("history_id")
+
+    if target_id:
+        selected_history = history_list.filter(history_id=target_id).first()
+
+    # 3. 선택된 게 없으면 -> 목록의 첫 번째(가장 높은 번호) 선택 or 새로 생성
+    if not selected_history:
+        if history_list.exists():
+            selected_history = history_list.first()
+        else:
+            # 기록이 없으면 새 방 생성 (1번방)
+            if user.is_authenticated:
+                selected_history = ChatHistory.objects.create(
+                    user=user, order_num=1, description="새로운 대화"
+                )
+            else:
+                session_id = request.session.session_key
+                selected_history = ChatHistory.objects.create(
+                    session_id=session_id,
+                    user=None,
+                    order_num=1,
+                    description="게스트 대화",
+                )
+
+            # (참고) 방금 만든 방은 쿼리셋 재평가 시 자동으로 반영됨
+
+    # 4. 선택된 방의 대화 내용 가져오기 (대화 내용은 순서대로 1,2,3...)
     chats = Chat.objects.filter(history=selected_history).order_by("order_num")
 
-    # 템플릿에 전달
-    current_user_id = user.id if user.is_authenticated else "guest"
-
     context = {
-        "user_id": current_user_id,
+        "user_id": user.id if user.is_authenticated else "guest",
         "selected_history_id": selected_history.history_id,
         "chat_history": chats,
+        "history_list": history_list,
     }
-    return render(request, "chat/chat_component.html", context)
+
+    return render(request, "chat/chat_interface.html", context)
 
 
 # =========================================================
@@ -306,17 +324,31 @@ def delete_message_api(request):
 # API: 새 대화 (비회원 지원)
 # =========================================================
 def new_chat(request):
+    """
+    새 대화방 생성 함수
+    - 단, '가장 최근 방'에 대화 내용이 하나도 없다면 생성하지 않고 기존 방을 재활용합니다.
+    """
+
+    # 1. 회원인 경우
     if request.user.is_authenticated:
-        # 회원: 유저 기준 조회
+        # 가장 최근(마지막) 히스토리 조회
         last_hist = (
             ChatHistory.objects.filter(user=request.user).order_by("-order_num").first()
         )
+
+        # [핵심 로직] 마지막 방이 존재하고, 그 방에 대화(chats)가 하나도 없다면?
+        if last_hist and not last_hist.chats.exists():
+            # 새로 만들지 말고 그냥 그 방으로 이동
+            return redirect("chat:chat_interface")
+
+        # 대화가 있거나 방이 아예 없으면 -> 새 번호 따서 생성
         new_order = (last_hist.order_num + 1) if last_hist else 1
         ChatHistory.objects.create(
             user=request.user, order_num=new_order, description=f"새 대화 {new_order}"
         )
+
+    # 2. 비회원인 경우
     else:
-        # 비회원: 세션 기준 조회
         if not request.session.session_key:
             request.session.save()
         session_id = request.session.session_key
@@ -326,6 +358,11 @@ def new_chat(request):
             .order_by("-order_num")
             .first()
         )
+
+        # [핵심 로직] 비회원도 마찬가지로 빈 방 체크
+        if last_hist and not last_hist.chats.exists():
+            return redirect("chat:chat_interface")
+
         new_order = (last_hist.order_num + 1) if last_hist else 1
         ChatHistory.objects.create(
             session_id=session_id,
@@ -335,3 +372,57 @@ def new_chat(request):
         )
 
     return redirect("chat:chat_interface")
+
+
+# =========================================================
+# API: 채팅방 순서 변경 (Drag & Drop 결과 저장)
+# =========================================================
+@csrf_exempt
+def update_history_order(request):
+    """
+    프론트엔드에서 [id_A, id_B, id_C] 순서로 ID 리스트를 보내면,
+    DB의 order_num을 업데이트하여 순서를 고정합니다.
+    """
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            ordered_ids = data.get("ordered_ids", [])
+
+            # 목록의 길이 (예: 10개면 10부터 시작해서 감소)
+            # 우리는 order_by('-order_num') 이므로, 숫자가 클수록 위에 뜸
+            total_count = len(ordered_ids)
+
+            for index, hist_id in enumerate(ordered_ids):
+                # 순서대로 점수 부여 (1등에게 가장 높은 숫자)
+                new_order = total_count - index
+                ChatHistory.objects.filter(
+                    history_id=hist_id, user=request.user
+                ).update(order_num=new_order)
+
+            return JsonResponse({"status": "success"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+# =========================================================
+# API: 채팅방 삭제 (목록에서 삭제)
+# =========================================================
+@csrf_exempt
+def delete_history_api(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            history_id = data.get("history_id")
+
+            # 본인 것인지 확인 후 삭제
+            ChatHistory.objects.filter(
+                history_id=history_id, user=request.user
+            ).delete()
+
+            return JsonResponse({"status": "success"})
+        except:
+            return JsonResponse({"status": "error", "message": "Failed to delete"})
+
+    return JsonResponse({"error": "Method not allowed"}, status=405)

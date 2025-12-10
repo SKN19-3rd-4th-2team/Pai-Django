@@ -1,77 +1,5 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-<div class="user-status-bar">
-    <div class="status-info">
-        {% if user.is_authenticated %}
-        <span class="status-badge login">🟢 회원</span>
-        <strong>{{ user.username }}</strong>님
-        {% else %}
-        <span class="status-badge guest">⚪ 비회원</span>
-        <strong>Guest</strong>
-        {% endif %}
-    </div>
-
-    <a href="{% url 'account:logout' %}" class="btn-logout">
-        로그아웃
-    </a>
-</div>
-
-<style>
-    /* 상단 바 스타일 */
-    .user-status-bar {
-        padding: 10px 15px;
-        background-color: #fff;
-        border-bottom: 1px solid #eee;
-        display: flex;
-        justify-content: space-between;
-        /* 양쪽 끝 정렬 */
-        align-items: center;
-    }
-
-    .status-info {
-        font-size: 14px;
-        color: #555;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .status-badge {
-        font-size: 11px;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-weight: bold;
-    }
-
-    .status-badge.login {
-        background-color: #e6fcf5;
-        color: #0ca678;
-    }
-
-    .status-badge.guest {
-        background-color: #f1f3f5;
-        color: #868e96;
-    }
-
-    /* 로그아웃 버튼 스타일 */
-    .btn-logout {
-        text-decoration: none;
-        font-size: 13px;
-        color: #fa5252;
-        /* 빨간색 계열 */
-        background-color: #fff5f5;
-        padding: 6px 12px;
-        border-radius: 6px;
-        border: 1px solid #ffc9c9;
-        font-weight: 600;
-        transition: all 0.2s;
-    }
-
-    .btn-logout:hover {
-        background-color: #fa5252;
-        color: white;
-    }
-</style>
 
 <div id="ai-chat-widget-container">
     <input type="hidden" id="current-history-id" value="{{ selected_history_id }}">
@@ -115,6 +43,8 @@
 </div>
 
 <style>
+    /* user-status-bar 관련 스타일도 삭제해도 됨 */
+
     /* 기존 스타일 유지 */
     #ai-chat-widget-container {
         width: 100%;
@@ -138,7 +68,6 @@
         flex-direction: column;
         gap: 12px;
         scroll-behavior: smooth;
-        /* 부드러운 스크롤 */
     }
 
     .chat-row {
@@ -384,34 +313,26 @@
     const sendBtn = document.getElementById('send-btn');
     const historyIdInput = document.getElementById('current-history-id');
 
-    // [신규] 스마트 스크롤 제어 변수
     let isAutoScrollActive = true;
 
-    // [신규] 스크롤 이벤트 리스너 추가
     chatHistory.addEventListener('scroll', () => {
-        // 현재 스크롤 위치 + 보여지는 높이
         const currentPos = chatHistory.scrollTop + chatHistory.clientHeight;
         const totalHeight = chatHistory.scrollHeight;
-
-        // 바닥에서 50px 이내에 있으면 "자동 스크롤 켜기"
         if (totalHeight - currentPos <= 50) {
             isAutoScrollActive = true;
         } else {
-            // 사용자가 위로 올렸으면 "자동 스크롤 끄기"
             isAutoScrollActive = false;
         }
     });
 
-    // 헬퍼: 바닥으로 스크롤 (조건부 실행)
     function scrollToBottom() {
         if (isAutoScrollActive) {
             chatHistory.scrollTop = chatHistory.scrollHeight;
         }
     }
 
-    // 헬퍼: 강제 스크롤 (메시지 보낼 때 등 무조건 내려야 할 때)
     function forceScrollToBottom() {
-        isAutoScrollActive = true; // 강제로 켜고
+        isAutoScrollActive = true;
         chatHistory.scrollTop = chatHistory.scrollHeight;
     }
 
@@ -426,7 +347,7 @@
                 renderMarkdownCard(targetDiv, rawMarkdown);
             }
         });
-        forceScrollToBottom(); // 초기 로딩 시 맨 밑으로
+        forceScrollToBottom();
     });
 
     function removeToolStatus() {
@@ -444,8 +365,6 @@
         userInput.value = '';
         userInput.disabled = true;
         sendBtn.disabled = true;
-
-        // [중요] 메시지 보낼 때는 무조건 맨 아래로 이동
         forceScrollToBottom();
 
         try {
@@ -490,7 +409,6 @@
                             createToolStatus(data.tool_name);
                         }
 
-                        // [중요] 스마트 스크롤 적용
                         scrollToBottom();
 
                     } catch (e) { }
@@ -509,13 +427,10 @@
             userInput.disabled = false;
             sendBtn.disabled = false;
             userInput.focus();
-
-            // 답변 끝난 후에도 보고 있던 위치 유지 (자동 스크롤 규칙 따름)
             scrollToBottom();
         }
     }
 
-    // 마크다운 카드 렌더링 함수
     function renderMarkdownCard(targetDiv, markdownText) {
         const parts = markdownText.split(/\n\s*---\s*\n/);
 
@@ -584,12 +499,12 @@
         if (role === 'user') {
             const rowDiv = createMessageBubble('user');
             rowDiv.querySelector('.chat-message').innerText = text;
-            forceScrollToBottom(); // 사용자 메시지 추가 시 강제 스크롤
+            forceScrollToBottom();
             return rowDiv;
         } else {
             const msgDiv = createMessageBubble('ai');
             msgDiv.innerHTML = "...";
-            forceScrollToBottom(); // AI 말풍선 생성 시 강제 스크롤
+            forceScrollToBottom();
             return msgDiv;
         }
     }
@@ -633,8 +548,6 @@
         div.className = 'tool-status';
         div.innerHTML = `<div class="spinner"></div><span>${toolName} 도구를 실행 중...</span>`;
         chatHistory.appendChild(div);
-
-        // 스마트 스크롤 적용
         scrollToBottom();
     }
 </script>
