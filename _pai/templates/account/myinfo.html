@@ -4,30 +4,61 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>내 정보 확인</title>
+    <title>마이페이지</title>
 </head>
 
 <body>
-    <div class="wrapper">
-        <h1>내 정보 확인</h1>
+    <h1>마이페이지</h1>
 
-        <div class="card">
-            <p class="label">ID</p>
-            <p class="value">{{ user_id }}</p>
+    {% if success_message %}
+    <p style="color: green;">{{ success_message }}</p>
+    {% endif %}
 
-            <p class="label">Password</p>
-            <p class="value">{{ password }}</p>
+    <h2>내 정보</h2>
+    <p><strong>아이디:</strong> {{ user_obj.username }}</p>
+    <p><strong>현재 별명:</strong> {{ user_obj.first_name }}</p>
 
-            <p class="label">성함</p>
-            <p class="value">{{ nickname }}</p>
+    <hr>
 
-            {% if message %}
-            <p class="message">{{ message }}</p>
-            {% endif %}
+    <h2>별명(닉네임) 수정</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ profile_form.non_field_errors }}
 
-            <button>수정하기</button>
+        <div>
+            {{ profile_form.nickname.label_tag }}
+            {{ profile_form.nickname }}
+            {{ profile_form.nickname.errors }}
         </div>
-    </div>
+
+        <button type="submit" name="profile_submit">별명 수정하기</button>
+    </form>
+
+    <hr>
+
+    <h2>비밀번호 변경</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ password_form.non_field_errors }}
+
+        <div>
+            {{ password_form.old_password.label_tag }}
+            {{ password_form.old_password }}
+            {{ password_form.old_password.errors }}
+        </div>
+        <div>
+            {{ password_form.new_password1.label_tag }}
+            {{ password_form.new_password1 }}
+            {{ password_form.new_password1.errors }}
+        </div>
+        <div>
+            {{ password_form.new_password2.label_tag }}
+            {{ password_form.new_password2 }}
+            {{ password_form.new_password2.errors }}
+        </div>
+
+        <button type="submit" name="password_submit">비밀번호 변경하기</button>
+    </form>
 </body>
 
 </html>

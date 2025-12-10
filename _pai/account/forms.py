@@ -31,7 +31,6 @@ class SignupForm(UserCreationForm):
         
     def save(self, commit=True):
         # nickname(별명)을 User.first_name에 저장
-        
         user = super().save(commit=False)
         nickname = self.cleaned_data.get('nickname', '').strip()
         if nickname:
@@ -51,3 +50,30 @@ class LoginForm(AuthenticationForm):
         label='비밀번호',
         widget=forms.PasswordInput(attrs={'class': 'input-box'})
     )
+
+
+# 마이페이지 Form
+class ProfileUpdateForm(forms.Form):
+    nickname = forms.CharField(
+        label='별명',
+        max_length=30,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'input-box',
+            'placeholder': '챗봇에게 불리고 싶은 이름',
+        }),
+    )
+
+    def __init__(self, *args, **kwargs):
+        # 어떤 유저의 정보를 수정할지 전달받기
+        self.user = kwargs.pop('user')
+        super().__init__(*args, **kwargs)
+        # 초기값을 현재 first_name에서 가져오기 → 기존에 저장된 별명
+        self.fields['nickname'].initial = self.user.first_name
+
+    def save(self, commit=True):
+        nickname = self.cleaned_data.get('nickname', '').strip()
+        self.user.first_name = nickname
+        if commit:
+            self.user.save()
+        return self.user
