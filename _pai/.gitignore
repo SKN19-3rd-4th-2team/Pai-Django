@@ -3,3 +3,4 @@ db_search/ipc_db/
 app/doc_db/
 app/ipc_db/
 .env
+__pycache__/
