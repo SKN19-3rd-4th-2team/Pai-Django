@@ -108,21 +108,48 @@
         <!-- 로그인 Form --> {# 수정 부분 #}
         <form method="POST" action="{% url 'account:login' %}">
             {% csrf_token %}
-            {{ form.non_field_errors }}
 
+            <!-- 로그인 실패(아이디/비번 불일치 등) -->
+            {% if form.non_field_errors %}
+                <div style="color:red; font-size:13px; margin-bottom:10px;">
+                    올바른 ID와 Password를 입력하십시오.<br>
+                    대문자와 소문자를 구별합니다.
+                </div>
+            {% endif %}
+
+            <!-- ID 입력 -->
             <div>
-                {{ form.username.errors }}
-                <input type="text" name="{{ form.username.name }}" class="input-box" placeholder="ID를 입력하세요."
+                <input type="text"
+                    name="{{ form.username.name }}"
+                    class="input-box"
+                    placeholder="ID를 입력하세요."
                     value="{{ form.username.value|default_if_none:'' }}">
+
+                {% if form.username.errors %}
+                    <div style="color:red; font-size:13px;">
+                        {{ form.username.errors.0 }}
+                    </div>
+                {% endif %}
             </div>
 
+
+            <!-- Password 입력 -->
             <div>
-                {{ form.password.errors }}
-                <input type="password" name="{{ form.password.name }}" class="input-box" placeholder="Password를 입력하세요.">
+                <input type="password"
+                    name="{{ form.password.name }}"
+                    class="input-box"
+                    placeholder="Password를 입력하세요.">
+
+                {% if form.password.errors %}
+                    <div style="color:red; font-size:13px;">
+                        {{ form.password.errors.0 }}
+                    </div>
+                {% endif %}
             </div>
 
             <button type="submit" class="login-btn">로그인</button>
         </form>
+
 
         <form action="{% url 'account:signup' %}">
             <button type="submit" class="signup-btn">회원가입</button>

@@ -1,13 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, logout, login as auth_login
-
+from django.contrib.auth.decorators import login_required
 # from django.contrib.auth import logout as auth_logout
 
 from django.http import HttpResponse
 
 from .forms import SignupForm, LoginForm
-
-# 수정 부분: signup(), login()
 
 
 # 회원가입
@@ -47,18 +45,19 @@ def login(request):
     return render(request, "account/login.html", {"form": form})
 
 
-# 로그아웃 (버튼 추가 후)
-# def logout(request):
-#     auth_logout(request)
-#     return redirect("")
-
-
-def chat(request):
-    return render(request, "account/chat.html")
-
 
 def withdraw(request):
     return render(request, "account/withdraw.html")
+
+
+@login_required
+def withdraw_final(request):
+    if request.method == "POST":
+        user = request.user
+        logout(request)        # 세션 로그아웃
+        user.delete()          # DB에서 삭제
+        return redirect("main:index")  # 너희 홈페이지 URL name
+    return redirect("account:mypage")  # POST가 아니면 마이페이지로 돌려보내기
 
 
 def myinfo(request):
@@ -71,6 +70,7 @@ def myinfo(request):
     return render(request, "account/myinfo.html", context)
 
 
+@login_required
 def logout_view(request):
     """
     로그아웃 처리:

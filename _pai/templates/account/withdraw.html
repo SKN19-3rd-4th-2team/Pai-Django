@@ -202,8 +202,13 @@
             </div>
         </div>
         <div class="header-right">
-            <button type="button" class="header-btn">채팅하기</button>
-            <button type="button" class="header-btn">로그아웃</button>
+            <form action="{% url 'chat:chat_interface' %}">
+                <button type="submit" class="header-btn">채팅하기</button>
+            </form>
+            <form action="{% url 'account:logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="header-btn">로그아웃</button>
+            </form>
         </div>
     </header>
 
@@ -255,6 +260,11 @@
         </div>
     </div>
 
+    <!-- 탈퇴 폼 (보이지 않음) -->
+    <form id="delete-form" method="POST" action="{% url 'account:withdraw_final' %}">
+        {% csrf_token %}
+    </form>
+
     <!-- 탈퇴 확인 모달 -->
     <div id="confirm-modal" class="modal-overlay">
         <div class="modal-box">
@@ -279,8 +289,9 @@
         const confirmModal = document.getElementById('confirm-modal');
         const confirmBtn = document.getElementById('confirm-btn');
         const cancelBtn = document.getElementById('cancel-btn');
+        const deleteForm = document.getElementById('delete-form');
 
-        // 회원탈퇴하기 버튼 → 모달 열기
+        // 모달 열기
         openModalBtn.addEventListener('click', function () {
             confirmModal.style.display = 'flex';
         });
@@ -290,19 +301,19 @@
             confirmModal.style.display = 'none';
         });
 
-        // 바깥 검은 영역 클릭 → 모달 닫기
+        // 바깥 영역 클릭 → 모달 닫기
         confirmModal.addEventListener('click', function (event) {
             if (event.target === confirmModal) {
                 confirmModal.style.display = 'none';
             }
         });
 
-        // 모달 안 탈퇴하기 → 실제 탈퇴 로직 자리 (지금은 알림만)
+        // 진짜 탈퇴하기 → 폼 제출
         confirmBtn.addEventListener('click', function () {
-            alert('탈퇴 처리가 되었다고 가정! (나중에 실제 기능 연결)');
-            confirmModal.style.display = 'none';
+            deleteForm.submit();  // POST 요청 전송
         });
     </script>
+
 </body>
 
 </html>
