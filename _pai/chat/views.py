@@ -325,51 +325,62 @@ def delete_message_api(request):
 # =========================================================
 def new_chat(request):
     """
-    새 대화방 생성 함수
-    - 단, '가장 최근 방'에 대화 내용이 하나도 없다면 생성하지 않고 기존 방을 재활용합니다.
+    새 대화방 생성 함수 (시간 기준 판단 + 재활용 시 최상단 이동)
+    1. '가장 최근에 생성된(created_at)' 방을 찾습니다.
+    2. 그 방이 비어있으면 -> 그 방의 순서(order)를 1등으로 높이고 재활용합니다.
+    3. 그 방에 대화가 있으면 -> 진짜 새 방을 만들고 순서를 1등으로 줍니다.
     """
 
-    # 1. 회원인 경우
-    if request.user.is_authenticated:
-        # 가장 최근(마지막) 히스토리 조회
-        last_hist = (
-            ChatHistory.objects.filter(user=request.user).order_by("-order_num").first()
-        )
+    user = request.user
+    target_history_qs = None  # 쿼리셋을 담을 변수
 
-        # [핵심 로직] 마지막 방이 존재하고, 그 방에 대화(chats)가 하나도 없다면?
-        if last_hist and not last_hist.chats.exists():
-            # 새로 만들지 말고 그냥 그 방으로 이동
-            return redirect("chat:chat_interface")
-
-        # 대화가 있거나 방이 아예 없으면 -> 새 번호 따서 생성
-        new_order = (last_hist.order_num + 1) if last_hist else 1
-        ChatHistory.objects.create(
-            user=request.user, order_num=new_order, description=f"새 대화 {new_order}"
-        )
-
-    # 2. 비회원인 경우
+    # 1. 대상 쿼리셋 설정 (회원/비회원 분기)
+    if user.is_authenticated:
+        target_history_qs = ChatHistory.objects.filter(user=user)
     else:
         if not request.session.session_key:
             request.session.save()
         session_id = request.session.session_key
+        target_history_qs = ChatHistory.objects.filter(session_id=session_id)
 
-        last_hist = (
-            ChatHistory.objects.filter(session_id=session_id)
-            .order_by("-order_num")
-            .first()
-        )
+    # 2. [판단 기준] 가장 최근에 '생성된' 방 찾기 (order 기준 아님!)
+    last_created_hist = target_history_qs.order_by("-created_at").first()
 
-        # [핵심 로직] 비회원도 마찬가지로 빈 방 체크
-        if last_hist and not last_hist.chats.exists():
-            return redirect("chat:chat_interface")
+    # 3. [순서 결정] 현재 존재하는 방들 중 가장 높은 order 번호 찾기
+    # (새로 만들거나, 기존 방을 위로 올릴 때 이 번호보다 커야 함)
+    current_max_order = (
+        target_history_qs.aggregate(Max("order_num"))["order_num__max"] or 0
+    )
+    new_top_order = current_max_order + 1
 
-        new_order = (last_hist.order_num + 1) if last_hist else 1
-        ChatHistory.objects.create(
-            session_id=session_id,
-            user=None,
-            order_num=new_order,
-            description=f"게스트 대화 {new_order}",
-        )
+    # 4. 로직 수행
+    if last_created_hist and not last_created_hist.chats.exists():
+        # A. 최근 방이 있는데, 텅 비어있다 -> "재활용 + 맨 위로 이동"
+
+        # 이미 맨 위라면(순서가 max라면) 굳이 업데이트 안 해도 됨
+        if last_created_hist.order_num < current_max_order:
+            last_created_hist.order_num = new_top_order
+            last_created_hist.save()
+
+        # 해당 방으로 이동
+        return redirect("chat:chat_interface")
+
+    else:
+        # B. 최근 방에 대화가 있거나, 방이 아예 없다 -> "새 방 생성"
+        if user.is_authenticated:
+            ChatHistory.objects.create(
+                user=user,
+                order_num=new_top_order,
+                description=f"새 대화 {new_top_order}",
+            )
+        else:
+            # 비회원
+            ChatHistory.objects.create(
+                session_id=request.session.session_key,
+                user=None,
+                order_num=new_top_order,
+                description=f"게스트 대화 {new_top_order}",
+            )
 
     return redirect("chat:chat_interface")
 
