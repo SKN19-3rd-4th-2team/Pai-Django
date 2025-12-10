@@ -105,12 +105,21 @@
         <!-- 로고 -->
         <img src="{% static 'images/logo_image.png' %}" alt="PAI Logo" class="logo-img">
 
-        <!-- 로그인 Form -->
-        <form method="POST" action="{% url 'account:login' %}"> {# 임시. #}
+        <!-- 로그인 Form --> {# 수정 부분 #}
+        <form method="POST" action="{% url 'account:login' %}">
             {% csrf_token %}
+            {{ form.non_field_errors }}
 
-            <input type="text" name="username" class="input-box" placeholder="ID를 입력하세요." value="{{ username }}">
-            <input type="password" name="password" class="input-box" placeholder="Password를 입력하세요.">
+            <div>
+                {{ form.username.errors }}
+                <input type="text" name="{{ form.username.name }}" class="input-box" placeholder="ID를 입력하세요."
+                    value="{{ form.username.value|default_if_none:'' }}">
+            </div>
+
+            <div>
+                {{ form.password.errors }}
+                <input type="password" name="{{ form.password.name }}" class="input-box" placeholder="Password를 입력하세요.">
+            </div>
 
             <button type="submit" class="login-btn">로그인</button>
         </form>

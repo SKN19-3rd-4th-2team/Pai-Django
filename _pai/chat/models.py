@@ -1,54 +1,53 @@
-from django.db import models
-
 # chat/models.py
+
 from django.db import models
-from django.contrib.auth.models import User  # 1. 사용자 테이블 (Django 기본 제공)
+from django.contrib.auth.models import User
 
 
-class ChatSession(models.Model):
-    """
-    2. 채팅 묶음 (Session)
-    사용자가 '새 채팅'을 누를 때마다 하나씩 생성되는 대화방 개념
-    """
+class ChatHistory(models.Model):
+    history_id = models.AutoField(primary_key=True)
 
+    # [수정] 비회원은 user가 없으므로 null=True 허용
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="chat_sessions"
-    )
-    title = models.CharField(max_length=200, default="새로운 대화")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.title}"
-
-
-class ChatMessage(models.Model):
-    """
-    3. 채팅 내역 (Message)
-    개별 말풍선 하나하나를 저장
-    """
-
-    class MessageType(models.TextChoices):
-        HUMAN = "human", "사용자"
-        AI = "ai", "AI"
-        TOOL = "tool", "시스템/도구"
-
-    session = models.ForeignKey(
-        ChatSession, on_delete=models.CASCADE, related_name="messages"
+        User,
+        on_delete=models.CASCADE,
+        db_column="user_id",
+        related_name="histories",
+        null=True,  # DB에 NULL 저장 허용
+        blank=True,  # 폼 검증 시 빈값 허용
     )
 
-    # 메시지 타입 (Human, AI, Tool 등)
-    msg_type = models.CharField(max_length=10, choices=MessageType.choices)
-
-    # 메시지 내용
-    content = models.TextField()
-
-    # 순서 (해당 세션 내에서 몇 번째 메시지인지)
-    order = models.IntegerField()
-
+    # [추가] 비회원 식별용 세션 ID
+    session_id = models.CharField(max_length=100, null=True, blank=True, db_index=True)
+    order_num = models.IntegerField(db_column="order", default=0)
+    description = models.CharField(max_length=255, default="New Chat")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["order"]  # 불러올 때 항상 순서대로
+        db_table = "chat_history"
 
     def __str__(self):
-        return f"[{self.session.id}] {self.msg_type}: {self.content[:20]}"
+        # 유저가 있으면 유저명, 없으면(비회원) 세션ID 표시
+        identifier = (
+            self.user.username if self.user else f"Guest-{str(self.session_id)[:8]}"
+        )
+        return f"{identifier} - {self.description}"
+
+
+class Chat(models.Model):
+    MESSAGE_TYPES = (("HUMAN", "Human"), ("AI", "AI"), ("TOOLS", "Tools"))
+    chat_id = models.AutoField(primary_key=True)
+    history = models.ForeignKey(
+        ChatHistory,
+        on_delete=models.CASCADE,
+        db_column="history_id",
+        related_name="chats",
+    )
+    type = models.CharField(max_length=10, choices=MESSAGE_TYPES)
+    order_num = models.IntegerField(db_column="order")
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "chat"
+        ordering = ["order_num"]
