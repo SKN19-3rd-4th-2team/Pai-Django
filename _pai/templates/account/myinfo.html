@@ -1,64 +1,178 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="ko">
+{% extends 'layout/account_base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>마이페이지</title>
-</head>
+{% block title %}Pai | 마이페이지{% endblock %}
 
-<body>
-    <h1>마이페이지</h1>
+{% block content %}
+<!-- 내 정보 확인 -->
+<div class="info-container">
+    <h2 class="page-title">내 정보 확인</h2>
 
-    {% if success_message %}
-    <p style="color: green;">{{ success_message }}</p>
-    {% endif %}
-
-    <h2>내 정보</h2>
-    <p><strong>아이디:</strong> {{ user_obj.username }}</p>
-    <p><strong>현재 별명:</strong> {{ user_obj.first_name }}</p>
-
-    <hr>
-
-    <h2>별명(닉네임) 수정</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ profile_form.non_field_errors }}
-
-        <div>
-            {{ profile_form.nickname.label_tag }}
-            {{ profile_form.nickname }}
-            {{ profile_form.nickname.errors }}
+    <div class="info-card">
+        <div class="info-group">
+            <label class="info-label">ID</label>
+            <div class="info-value">{{ user.username }}</div>
         </div>
 
-        <button type="submit" name="profile_submit">별명 수정하기</button>
-    </form>
-
-    <hr>
-
-    <h2>비밀번호 변경</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ password_form.non_field_errors }}
-
-        <div>
-            {{ password_form.old_password.label_tag }}
-            {{ password_form.old_password }}
-            {{ password_form.old_password.errors }}
-        </div>
-        <div>
-            {{ password_form.new_password1.label_tag }}
-            {{ password_form.new_password1 }}
-            {{ password_form.new_password1.errors }}
-        </div>
-        <div>
-            {{ password_form.new_password2.label_tag }}
-            {{ password_form.new_password2 }}
-            {{ password_form.new_password2.errors }}
+        <div class="info-group">
+            <label class="info-label">닉네임</label>
+            <div class="info-value">{{ user.first_name|default:"설정되지 않음" }}</div>
         </div>
 
-        <button type="submit" name="password_submit">비밀번호 변경하기</button>
-    </form>
-</body>
+        <div class="info-group">
+            <label class="info-label">가입일</label>
+            <div class="info-value">{{ user.date_joined|date:"Y년 m월 d일" }}</div>
+        </div>
 
-</html>
+        {% if message %}
+        <div class="success-message">{{ message }}</div>
+        {% endif %}
+
+        <div class="button-group">
+            <button type="button" class="primary-btn" onclick="location.href='#'">정보 수정</button>
+            <button type="button" class="chat-btn" onclick="location.href='{% url 'chat:chat_interface' %}'">채팅으로</button>
+        </div>
+        
+        <div class="danger-zone">
+            <h3 class="danger-title">위험 구역</h3>
+            <p class="danger-desc">회원탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.</p>
+            <button type="button" class="danger-btn" onclick="confirmWithdraw()">회원탈퇴</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.info-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.page-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #4A5B7D;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.info-card {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.info-group {
+    margin-bottom: 25px;
+}
+
+.info-label {
+    display: block;
+    font-weight: 600;
+    color: #4A5B7D;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.info-value {
+    padding: 12px 16px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    color: #495057;
+    font-size: 16px;
+}
+
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.secondary-btn {
+    flex: 1;
+    padding: 12px 24px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.secondary-btn:hover {
+    background-color: #5a6268;
+}
+
+.chat-btn {
+    flex: 1;
+    padding: 12px 24px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.chat-btn:hover {
+    background-color: #218838;
+}
+
+.danger-zone {
+    margin-top: 40px;
+    padding: 25px;
+    border: 2px solid #dc3545;
+    border-radius: 8px;
+    background-color: #fff5f5;
+}
+
+.danger-title {
+    color: #dc3545;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.danger-desc {
+    color: #721c24;
+    font-size: 14px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.danger-btn {
+    padding: 10px 20px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.danger-btn:hover {
+    background-color: #c82333;
+}
+</style>
+
+<script>
+function confirmWithdraw() {
+    location.href = "{% url 'account:withdraw' %}";
+}
+</script>
+{% endblock %}

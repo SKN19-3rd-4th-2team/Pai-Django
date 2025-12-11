@@ -1,0 +1,11 @@
+/* 네비게이션 바 전용 CSS - main_style.css와 동일한 스타일 적용 */
+
+/* chat 페이지에서 body에 padding-top 추가 */
+.chat-page {
+    padding-top: 80px !important;
+}
+
+/* main-container 상단 여백 추가 */
+.chat-page .main-container {
+    margin-top: 0 !important;
+}

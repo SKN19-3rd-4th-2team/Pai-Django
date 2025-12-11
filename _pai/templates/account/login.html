@@ -1,171 +1,38 @@
-{% load static %}
+{% extends 'layout/account_base.html' %}
 
-<!DOCTYPE html>
-<html lang="ko">
+{% block title %}Pai | 로그인{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patent AI - Login</title>
+{% block content %}
+<!-- 로그인 Form -->
+<form method="POST" action="{% url 'account:login' %}">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
 
-    <style>
-        body {
-            background-color: #ffffff;
-            font-family: 'Pretendard', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .login-container {
-            width: 430px;
-            padding: 40px 30px;
-            border: 2px solid #2d396b;
-            border-radius: 30px;
-            text-align: center;
-        }
-
-        .logo-img {
-            width: 200px;
-            margin-bottom: 20px;
-        }
-
-        .input-box {
-            box-sizing: border-box;
-            width: 100%;
-            padding: 13px;
-            border-radius: 25px;
-            border: 1px solid #c9c9c9;
-            margin: 10px 0;
-            outline: none;
-            font-size: 15px;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 25px;
-            background-color: #3f4a78;
-            color: white;
-            border: none;
-            font-size: 16px;
-            margin-top: 15px;
-            cursor: pointer;
-        }
-
-        .signup-btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 25px;
-            background-color: #f2f2f2;
-            color: #3f3f3f;
-            border: none;
-            font-size: 15px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-
-        .line-wrap {
-            display: flex;
-            align-items: center;
-            margin: 18px 0;
-        }
-
-        .line {
-            flex-grow: 1;
-            height: 1px;
-            background-color: #cfcfcf;
-        }
-
-        .guest-btn {
-            width: 100%;
-            padding: 14px;
-            border-radius: 25px;
-            background-color: #e8edff;
-            color: #3f4a78;
-            border: none;
-            font-size: 15px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-
-<body>
-
-    {% if error %}
-    <script>
-        alert("{{ error }}");
-    </script>
-    {% endif %}
-
-    <div class="login-container">
-
-        <!-- 로고 -->
-        <img src="{% static 'images/logo_image.png' %}" alt="PAI Logo" class="logo-img">
-
-        <!-- 로그인 Form --> {# 수정 부분 #}
-        <form method="POST" action="{% url 'account:login' %}">
-            {% csrf_token %}
-
-            <!-- 로그인 실패(아이디/비번 불일치 등) -->
-            {% if form.non_field_errors %}
-                <div style="color:red; font-size:13px; margin-bottom:10px;">
-                    올바른 ID와 Password를 입력하십시오.<br>
-                    대문자와 소문자를 구별합니다.
-                </div>
-            {% endif %}
-
-            <!-- ID 입력 -->
-            <div>
-                <input type="text"
-                    name="{{ form.username.name }}"
-                    class="input-box"
-                    placeholder="ID를 입력하세요."
-                    value="{{ form.username.value|default_if_none:'' }}">
-
-                {% if form.username.errors %}
-                    <div style="color:red; font-size:13px;">
-                        {{ form.username.errors.0 }}
-                    </div>
-                {% endif %}
-            </div>
-
-
-            <!-- Password 입력 -->
-            <div>
-                <input type="password"
-                    name="{{ form.password.name }}"
-                    class="input-box"
-                    placeholder="Password를 입력하세요.">
-
-                {% if form.password.errors %}
-                    <div style="color:red; font-size:13px;">
-                        {{ form.password.errors.0 }}
-                    </div>
-                {% endif %}
-            </div>
-
-            <button type="submit" class="login-btn">로그인</button>
-        </form>
-
-
-        <form action="{% url 'account:signup' %}">
-            <button type="submit" class="signup-btn">회원가입</button>
-        </form>
-
-        <div class="line-wrap">
-            <div class="line"></div>
-            <div style="width:20px;"></div>
-            <div class="line"></div>
-        </div>
-
-        <form action="{% url 'chat:chat_interface' %}">
-            <button type="submit" class="guest-btn">비회원으로 이용</button>
-        </form>
+    <div>
+        {{ form.username.errors }}
+        <input type="text" name="{{ form.username.name }}" class="input-box" placeholder="ID를 입력하세요."
+            value="{{ form.username.value|default_if_none:'' }}">
     </div>
 
-</body>
+    <div>
+        {{ form.password.errors }}
+        <input type="password" name="{{ form.password.name }}" class="input-box" placeholder="Password를 입력하세요.">
+    </div>
 
-</html>
+    <button type="submit" class="primary-btn">로그인</button>
+</form>
+
+<form action="{% url 'account:signup' %}">
+    <button type="submit" class="secondary-btn">회원가입</button>
+</form>
+
+<div class="line-wrap">
+    <div class="line"></div>
+    <div style="width:20px;"></div>
+    <div class="line"></div>
+</div>
+
+<form action="{% url 'chat:chat_interface' %}">
+    <button type="submit" class="guest-btn">비회원으로 이용</button>
+</form>
+{% endblock %}

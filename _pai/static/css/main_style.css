@@ -6,87 +6,92 @@
 a { text-decoration: none; color: inherit; }
 ul { list-style: none; }
 
-/* [중요] 부모 요소 높이 설정 (스냅 동작 필수 조건) */
+/* [중요] 부모 요소 높이 설정 */
 html, body {
     width: 100%;
-    height: 100%;
-    overflow: hidden; /* 기본 스크롤바 숨김 */
+    overflow-x: hidden; /* 가로 스크롤만 숨김 */
+    scroll-padding-top: 100px; /* 스크롤 시 navbar 높이만큼 여백 확보 */
 }
 
-/* --- 1. 헤더 (고정) --- */
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
+/* --- 1. 커스텀 네비게이션 바 (고정) --- */
+.custom-navbar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 80px !important;
+    background-color: rgba(255, 255, 255, 0.98) !important; /* 더 불투명하게 */
+    backdrop-filter: blur(15px); /* 블러 효과 증가 */
+    border-bottom: 2px solid #ddd !important; /* 경계선 강화 */
+    z-index: 10000 !important; /* z-index 증가 */
+    display: flex !important;
+    align-items: center !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important; /* 그림자 추가 */
+}
+
+.navbar-container {
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.95);
-    border-bottom: 1px solid #eee;
-    z-index: 1000;
-}
-
-.header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 50px;
-    height: 80px;
 }
 
-@media (max-width: 768px) {
-    .header-inner { padding: 15px 20px; }
+.navbar-logo .logo-img {
+    height: 40px;
+    width: auto;
 }
 
-.logo { width: 100px; height: auto; display: block; }
-.auth-buttons { display: flex; gap: 10px; }
-
-/* 버튼 기본 스타일 */
-.btn { 
-    padding: 10px 24px; 
-    font-size: 18px; 
-    font-weight: 600; 
-    border-radius: 4px; 
-    border: none; 
-    cursor: pointer; 
-    transition: all 0.2s; /* 부드러운 전환 효과 */
+.navbar-menu {
+    display: flex;
+    gap: 15px;
+    align-items: center;
 }
 
-/* [수정됨] 헤더 버튼: 호버 효과 추가 */
-.btn-header { 
-    background-color: #4A5B7D; 
-    color: white; 
-    box-shadow: 0 4px 0 #2E3A52; 
+.nav-welcome {
+    color: #4A5B7D;
+    font-weight: 600;
+    font-size: 14px;
 }
 
-/* 마우스 올렸을 때 (Hover) */
-.btn-header:hover {
-    background-color: #3b4c6e; /* 색상 진하게 */
-    transform: translateY(-2px); /* 살짝 위로 뜸 */
-    box-shadow: 0 6px 0 #2E3A52; /* 그림자 길어짐 */
+.nav-link {
+    padding: 10px 20px;
+    background-color: #4A5B7D;
+    color: white;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: all 0.2s;
+    text-decoration: none;
 }
 
-/* 클릭했을 때 (Active) */
-.btn-header:active { 
-    transform: translateY(4px); /* 눌리는 느낌 */
-    box-shadow: none; 
+.nav-link:hover {
+    background-color: #3b4c6e;
+    transform: translateY(-2px);
+    color: white;
 }
+
+/* 기존 헤더 스타일 제거됨 - 커스텀 navbar 사용 */
 
 
 /* --- 2. 스크롤 래퍼 --- */
 .snap-wrapper {
     width: 100%;
-    height: 100vh;
-    overflow: hidden;
     position: relative;
+    padding-top: 100px; /* navbar 높이보다 여유있게 패딩 추가 */
 }
 
 /* --- 3. 공통 섹션 스타일 --- */
 .full-section {
     width: 100%;
-    height: 100vh;
+    min-height: 55vh; /* 높이를 적절히 조정 */
     display: flex;
     align-items: center; 
     justify-content: center;
     position: relative;
+    padding: 30px 0; /* 패딩을 적절히 증가 */
+    scroll-margin-top: 100px; /* 스크롤 시 navbar 높이만큼 여백 */
 }
 
 .container {
@@ -97,14 +102,12 @@ header {
 
 
 /* --- 4. Hero Section 스타일 --- */
-.hero { background-color: #F8F9FB; }
-
-.hero-container-flex {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100%;
+.hero { 
+    background-color: #F8F9FB; 
+    padding-top: 20px; /* 추가 패딩으로 navbar와 겹치지 않도록 */
 }
+
+/* hero-container-flex 제거됨 - 사용하지 않음 */
 
 /* [수정됨] 내부 컨텐츠 레이아웃: 왼쪽 패딩 추가로 전체를 오른쪽으로 밈 */
 .hero-content-wrapper {
@@ -112,7 +115,7 @@ header {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    margin-bottom: 60px;
+    margin-bottom: 30px; /* 마진을 적절히 증가 */
     
     padding-left: 40px; /* [핵심] 전체적으로 오른쪽으로 이동시킴 */
 }
@@ -128,41 +131,47 @@ header {
     font-size: 72px; 
     font-weight: 700; 
     margin-bottom: 15px; 
-    color: #2c3e50;
-    opacity: 0; animation: fadeInUp 0.8s ease-out forwards; animation-delay: 0.2s; 
+    color: #4A5B7D; /* 통일된 색상 */
+    opacity: 1; /* 일단 바로 보이게 하고 */
+    animation: fadeInUp 0.8s ease-out; /* forwards 제거 */
+    animation-delay: 0.1s; /* 지연시간 단축 */
 }
 .hero-subtitle { 
     font-size: 32px; 
     font-weight: 600; 
-    color: #556677; 
+    color: #4A5B7D; /* 통일된 색상 */
     margin-bottom: 30px;
-    opacity: 0; animation: fadeInUp 0.8s ease-out forwards; animation-delay: 0.4s;
+    opacity: 1; /* 일단 바로 보이게 하고 */
+    animation: fadeInUp 0.8s ease-out; /* forwards 제거 */
+    animation-delay: 0.2s; /* 지연시간 단축 */
 }
 .hero-desc { 
     font-size: 20px; 
     line-height: 1.7; 
-    color: #4a4a4a; 
+    color: #4A5B7D; /* 통일된 색상 */
     margin-bottom: 0;
-    opacity: 0; animation: fadeInUp 0.8s ease-out forwards; animation-delay: 0.6s;
+    opacity: 1; /* 일단 바로 보이게 하고 */
+    animation: fadeInUp 0.8s ease-out; /* forwards 제거 */
+    animation-delay: 0.3s; /* 지연시간 단축 */
 }
-.hero-desc strong { color: #2c3e50; }
+/* hero-desc strong 제거됨 - 부모 색상 상속 */
 
 /* 시작하기 버튼 */
 .btn-start {
     display: block;
-    margin: 0 auto; 
+    margin: 15px auto 0; 
     width: fit-content;
     background-color: #4A5B7D;
     color: white;
-    font-size: 24px;
+    font-size: 19px; /* 24px에서 19px로 (약 20% 축소) */
     font-weight: 800;
-    padding: 15px 60px;
-    border-radius: 50px;
-    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    padding: 12px 48px; /* 15px 60px에서 12px 48px로 (20% 축소) */
+    border-radius: 40px; /* 50px에서 40px로 (20% 축소) */
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2); /* 그림자도 비례해서 축소 */
     transition: transform 0.2s, background-color 0.2s;
-    opacity: 0;
-    animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-    animation-delay: 0.8s;
+    opacity: 1; /* 일단 바로 보이게 */
+    animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    animation-delay: 0.4s; /* 지연시간 단축 */
 }
 .btn-start:hover { background-color: #3b4c6e; transform: scale(1.05); }
 
@@ -172,10 +181,12 @@ header {
     text-align: right; 
     display: flex; 
     justify-content: center; 
-    opacity: 0; animation: fadeInRight 1s ease-out forwards; animation-delay: 0.4s;
+    opacity: 1; /* 일단 바로 보이게 */
+    animation: fadeInRight 1s ease-out; 
+    animation-delay: 0.2s; /* 지연시간 단축 */
 }
 .mascot-img { 
-    max-width: 300px; /* 300px 유지 */
+    max-width: 200px; /* 300px에서 200px로 줄임 */
     width: 100%; height: auto; 
     animation: float 3s ease-in-out infinite; 
 }
@@ -187,7 +198,7 @@ header {
 .section-title {
     font-size: 42px;
     font-weight: 800;
-    color: #2c3e50;
+    color: #4A5B7D; /* 통일된 색상 */
     margin-bottom: 80px;
     text-align: center;
 }
@@ -207,13 +218,32 @@ header {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    opacity: 0; transform: translateY(30px); transition: all 0.6s ease-out; 
+    opacity: 1; /* 일단 바로 보이게 */
+    transform: translateY(0); /* 위치 고정 */
+    transition: all 0.6s ease-out;
 }
 .feature-card.show { opacity: 1; transform: translateY(0); }
 
-.feature-title { font-size: 24px; font-weight: 700; margin-bottom: 25px; color: #2c3e50; }
-.feature-desc { font-size: 18px; color: #555; line-height: 1.6; word-break: keep-all; }
+.feature-title { font-size: 24px; font-weight: 700; margin-bottom: 25px; color: #4A5B7D; } /* 통일된 색상 */
+.feature-desc { font-size: 18px; color: #4A5B7D; line-height: 1.6; word-break: keep-all; } /* 통일된 색상 */
 
+
+/* --- Footer 강제 표시 --- */
+.footer-notice {
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 1000 !important;
+    text-align: center !important;
+    font-size: 16px !important;
+    color: #4A5B7D !important;
+    font-weight: 600 !important;
+    padding: 40px 0 !important;
+    margin-top: 80px !important;
+    border-top: 3px solid #4A5B7D !important;
+    background-color: #f8f9fa !important;
+    width: 100% !important;
+}
 
 /* --- 애니메이션 키프레임 --- */
 @keyframes fadeInUp {

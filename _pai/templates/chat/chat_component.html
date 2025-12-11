@@ -1,3 +1,4 @@
+{% load static %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
 
@@ -12,6 +13,8 @@
             class="chat-row {% if msg.type == 'HUMAN' %}user-row{% else %}ai-row{% endif %}">
             {% if msg.type == 'HUMAN' %}
             <button class="delete-btn" onclick="deleteMessage('{{ msg.chat_id }}')" title="대화 삭제">🗑️</button>
+            {% else %}
+            <img src="{% static 'images/chat_pai.png' %}" alt="Pai Avatar" class="ai-avatar">
             {% endif %}
 
             <div
@@ -29,6 +32,7 @@
         {% endfor %}
         {% else %}
         <div class="chat-row ai-row">
+            <img src="{% static 'images/chat_pai.png' %}" alt="Pai Avatar" class="ai-avatar">
             <div class="chat-message ai-message">
             안녕하세요! 👋<br>
             저는 <b>컴퓨터 비전 분야 특허에 특화된 AI 어시스턴트</b>입니다.<br>
@@ -108,6 +112,18 @@
     .ai-row {
         justify-content: flex-start;
     }
+    
+    .ai-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 12px;
+        flex-shrink: 0;
+        align-self: flex-end;
+        object-fit: cover;
+        object-position: center;
+        border: 2px solid #e0e0e0;
+    }
 
     .chat-message {
         max-width: 80%;
@@ -119,8 +135,8 @@
     }
 
     .user-message {
-        background-color: #4a90e2;
-        color: #fff;
+        background-color: #D0DDEF;
+        color: #333;
         border-bottom-right-radius: 2px;
     }
 
@@ -194,12 +210,17 @@
 
     #send-btn {
         padding: 0 20px;
-        background-color: #4a90e2;
+        background-color: #4A5B7D;
         color: #fff;
         border: none;
         border-radius: 6px;
         cursor: pointer;
         font-weight: 600;
+        transition: background-color 0.2s ease;
+    }
+    
+    #send-btn:hover {
+        background-color: #3b4c6e;
     }
 
     #send-btn:disabled {
@@ -520,6 +541,16 @@
     function createMessageBubble(role) {
         const rowDiv = document.createElement('div');
         rowDiv.className = `chat-row ${role === 'user' ? 'user-row' : 'ai-row'}`;
+        
+        // AI 메시지인 경우 아바타 추가
+        if (role === 'ai') {
+            const avatarImg = document.createElement('img');
+            avatarImg.src = "{% static 'images/chat_pai.png' %}";
+            avatarImg.alt = "Pai Avatar";
+            avatarImg.className = 'ai-avatar';
+            rowDiv.appendChild(avatarImg);
+        }
+        
         const msgDiv = document.createElement('div');
         msgDiv.className = `chat-message ${role === 'user' ? 'user-message' : 'ai-message'}`;
         rowDiv.appendChild(msgDiv);

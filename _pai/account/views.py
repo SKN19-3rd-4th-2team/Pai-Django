@@ -114,7 +114,7 @@ def logout_view(request):
     로그아웃 처리:
     1. 현재 사용자의 세션 데이터를 삭제합니다 (DB의 django_session 테이블에서 제거).
     2. 브라우저의 sessionid 쿠키도 무효화됩니다.
-    3. 로그인 페이지로 튕겨냅니다.
+    3. 메인 페이지로 이동합니다.
     """
     logout(request)
-    return redirect("account:login")  # 로그인 페이지로 이동
+    return redirect("main:index")  # 메인 페이지로 이동

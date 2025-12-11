@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Pai - Patent AI{% endblock %}</title>
+    
+    <!-- 공통 CSS -->
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    
+    <style>
+        body {
+            background-color: #ffffff;
+            font-family: 'Pretendard', sans-serif;
+            display: flex;
+            flex-direction: column; /* 세로 방향으로 배치 */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* height 대신 min-height 사용 */
+            margin: 0;
+        }
+
+        .auth-container {
+            width: 344px; /* 430px의 80% */
+            padding: 32px 24px; /* 40px 30px의 80% */
+            border: 2px solid #2d396b;
+            border-radius: 24px; /* 30px의 80% */
+            text-align: center;
+        }
+
+        .logo-img {
+            width: 160px; /* 200px의 80% */
+            margin-bottom: 16px; /* 20px의 80% */
+        }
+
+        .form-group {
+            margin-bottom: 12px; /* 15px의 80% */
+            text-align: left;
+        }
+
+        label {
+            color: #3f4a78;
+            display: block;
+            margin-bottom: 4px; /* 5px의 80% */
+            font-size: 11px; /* 14px의 80% */
+            font-weight: 600;
+        }
+
+        .input-box {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px; /* 13px의 80% */
+            border-radius: 20px; /* 25px의 80% */
+            border: 1px solid #c9c9c9;
+            margin: 8px 0; /* 10px의 80% */
+            outline: none;
+            font-size: 12px; /* 15px의 80% */
+        }
+
+        .primary-btn {
+            width: 100%;
+            padding: 11px; /* 14px의 80% */
+            border-radius: 20px; /* 25px의 80% */
+            background-color: #3f4a78;
+            color: white;
+            border: none;
+            font-size: 13px; /* 16px의 80% */
+            margin-top: 12px; /* 15px의 80% */
+            cursor: pointer;
+        }
+
+        .primary-btn:hover {
+            background-color: #2d396b;
+        }
+
+        .secondary-btn {
+            width: 100%;
+            padding: 11px; /* 14px의 80% */
+            border-radius: 20px; /* 25px의 80% */
+            background-color: #f2f2f2;
+            color: #3f3f3f;
+            border: none;
+            font-size: 12px; /* 15px의 80% */
+            margin-top: 8px; /* 10px의 80% */
+            cursor: pointer;
+        }
+
+        .secondary-btn:hover {
+            background-color: #e8e8e8;
+        }
+
+        .guest-btn {
+            width: 100%;
+            padding: 11px; /* 14px의 80% */
+            border-radius: 20px; /* 25px의 80% */
+            background-color: #e8edff;
+            color: #3f4a78;
+            border: none;
+            font-size: 12px; /* 15px의 80% */
+            cursor: pointer;
+        }
+
+        .guest-btn:hover {
+            background-color: #d4e2ff;
+        }
+
+        .line-wrap {
+            display: flex;
+            align-items: center;
+            margin: 14px 0; /* 18px의 80% */
+        }
+
+        .line {
+            flex-grow: 1;
+            height: 1px;
+            background-color: #cfcfcf;
+        }
+
+        .error-message {
+            color: #d32f2f;
+            font-size: 10px; /* 12px의 80% */
+            margin-top: 4px; /* 5px의 80% */
+        }
+
+        /* Account 페이지용 footer 스타일 */
+        .account-footer {
+            position: static;
+            text-align: center;
+            font-size: 10px;
+            color: #777;
+            font-weight: 400;
+            margin-top: 40px;
+            width: 100%; /* 전체 너비 사용 */
+            flex-shrink: 0; /* flex 축소 방지 */
+        }
+
+        .account-footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    {% if error %}
+    <script>
+        alert("{{ error }}");
+    </script>
+    {% endif %}
+
+    <div class="auth-container">
+        <!-- 로고 -->
+        <img src="{% static 'images/logo_image.png' %}" alt="PAI Logo" class="logo-img">
+
+        <!-- 페이지별 내용 -->
+        {% block content %}
+        {% endblock %}
+    </div>
+<footer class="footer-notice account-footer">
+    <p>&copy; 2025 PaI &ndash; Patent AI Assistant. All rights reserved.</p>
+</footer>
+</body>
+</html>
