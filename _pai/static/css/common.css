@@ -150,6 +150,22 @@
 .p-4 { padding: 1.5rem !important; }
 .p-5 { padding: 3rem !important; }
 
+/* === Footer 스타일 === */
+.footer-notice {
+    text-align: center;
+    font-size: 12px; /* 크기를 키워서 더 보이게 */
+    color: #4A5B7D; /* 더 진한 색상으로 변경 */
+    font-weight: 500; /* 폰트 굵기 증가 */
+    padding: 30px 0; /* 패딩 증가 */
+    margin-top: 60px; /* 마진 증가 */
+    border-top: 2px solid #4A5B7D; /* 경계선을 더 진하게 */
+    background-color: #f8f9fa; /* 배경색 추가 */
+}
+
+.footer-notice p {
+    margin: 0;
+}
+
 /* === 반응형 === */
 @media (max-width: 768px) {
     .btn {
