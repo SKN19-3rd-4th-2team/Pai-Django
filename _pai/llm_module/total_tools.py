@@ -304,7 +304,7 @@ def tool_search_detail_patent_by_id(
       코드별 상세 설명과 계층 구조까지 함께 제공할 수 있습니다.
 
     주의 사항:
-    - 이 DB는 '컴퓨터 비전/모빌리티' 등 특정 도메인에 한정된 서브셋일 수 있습니다.
+    - 이 DB는 '컴퓨터 비전' 등 특정 도메인에 한정된 서브셋일 수 있습니다.
       따라서, 출원번호가 실제로 존재하더라도, 이 벡터 DB 안에 없을 수 있습니다.
       그런 경우에는 found=False와 함께, KIPRIS/특허로 등 외부 서비스를 안내해야 합니다.
     """
@@ -447,7 +447,7 @@ def tool_search_detail_patent_by_id(
         found=True,
         title=title_value,
         priority=priority_value,
-        register=register_value,
+        register_status=register_value,
         ipc_raw=ipc_raw_value,
         ipc_codes=ipc_codes_list,
         link=link_value,

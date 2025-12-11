@@ -356,6 +356,42 @@ class PatentByIdOutput(BaseModel):
             "메타데이터에 title 정보가 없다면 빈 문자열일 수 있다."
         ),
     )
+    priority: str = Field(
+        "",
+        description=(
+            "우선권/출원 국가 정보. 예: '대한민국', 'KR', 'US' 등. "
+            "메타데이터에 priority 정보가 없다면 빈 문자열일 수 있다."
+        ),
+    )
+    register_status: str = Field(
+        "",
+        description=(
+            "공개/등록 상태. 예: '공개', '등록', '출원' 등. "
+            "메타데이터에 register 정보가 없다면 빈 문자열일 수 있다."
+        ),
+    )
+    ipc_raw: str = Field(
+        "",
+        description=(
+            "원본 IPC 문자열 전체. "
+            "예: 'H04M 3/42, H04B 1/40, G06F 17/00, G06Q 30/06'. "
+            "쉼표로 구분된 하나의 문자열일 수 있다."
+        ),
+    )
+    ipc_codes: List[str] = Field(
+        default_factory=list,
+        description=(
+            "ipc_raw 를 쉼표/세미콜론 등을 기준으로 파싱한 개별 IPC 코드 리스트. "
+            "각 요소는 공백이 정리된 코드 문자열이다. 예: ['H04M 3/42', 'H04B 1/40']"
+        ),
+    )
+    link: str = Field(
+        "",
+        description=(
+            "특허 공보 열람 링크 (예: KIPRIS Plus, 특허로 등). "
+            "메타데이터에 링크 정보가 없다면 빈 문자열일 수 있다."
+        ),
+    )
     num_claims: int = Field(
         ...,
         description="DB에서 조회된 청구항 개수.",

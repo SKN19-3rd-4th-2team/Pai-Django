@@ -327,10 +327,12 @@
             <div class="history-list" id="history-list">
                 {% for hist in history_list %}
                 <div class="history-item-container {% if hist.history_id == selected_history_id %}active{% endif %}"
-                    draggable="true" data-id="{{ hist.history_id }}">
+                    draggable="true"
+                    data-id="{{ hist.history_id }}"
+                    id="history-item-{{ hist.history_id }}">
 
                     <a href="?history_id={{ hist.history_id }}" class="history-link">
-                        {{ hist.description }}
+                        <span class="history-title">{{ hist.description }}</span>
                     </a>
 
                     <button class="menu-btn" onclick="toggleMenu(event, '{{ hist.history_id }}')">•••</button>
@@ -341,9 +343,13 @@
                         </div>
                     </div>
                 </div>
+
                 {% empty %}
-                <div style="padding:20px; text-align:center; color:#999; font-size:13px;">대화 기록이 없습니다.</div>
+                <div style="padding:20px; text-align:center; color:#999; font-size:13px;">
+                    대화 기록이 없습니다.
+                </div>
                 {% endfor %}
+
             </div>
         </aside>
 
@@ -455,6 +461,19 @@
                     return closest;
                 }
             }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        /* ===========================================================
+           === 4. LLM 제목 요약 업데이트 (핵심 추가 기능) ===
+           =========================================================== */
+        function updateHistoryTitle(historyId, newTitle) {
+            const item = document.querySelector(`#history-item-${historyId}`);
+            if (!item) return;
+
+            const titleElem = item.querySelector(".history-title");
+            if (titleElem) {
+                titleElem.textContent = newTitle;
+            }
         }
     </script>
 

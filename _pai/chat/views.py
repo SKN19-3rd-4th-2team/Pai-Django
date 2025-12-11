@@ -13,8 +13,49 @@ from .models import ChatHistory, Chat
 from llm_module.main import get_graph_agent
 from llm_module.SYSTEM_PROMPT import SYSTEM_PROMPT
 from llm_module.memory_utils import convert_db_chats_to_langchain
+from openai import OpenAI
+from django.conf import settings
 
 agent_executor = get_graph_agent()
+
+client = OpenAI(api_key=getattr(settings, "OPENAI_API_KEY", None))
+
+
+def generate_history_title_by_llm(first_message: str) -> str:
+    """
+    첫 사용자 메시지를 기반으로 채팅방 제목(20자 이내)을 생성한다.
+    """
+    try:
+        prompt = (
+            "다음 사용자의 첫 질문을 보고, 채팅방 제목으로 쓸 짧은 한글 문구를 만들어줘. "
+            "20자 이내로, 마침표 없이 간단하게.\n\n"
+            f"질문: {first_message}"
+        )
+
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",  # 필요하면 모델 이름 바꿔도 됨
+            messages=[
+                {"role": "system", "content": "너는 채팅방 제목을 짧게 요약해주는 도우미야."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=50,
+            temperature=0.3,
+        )
+        title = resp.choices[0].message.content.strip()
+
+        # 길면 잘라주기
+        if len(title) > 20:
+            title = title[:20]
+
+        # 혹시 비어 있으면 fallback
+        if not title:
+            title = first_message[:20] + "..."
+
+        return title
+
+    except Exception:
+        # LLM 실패해도 앱이 안 죽도록 안전장치
+        return first_message[:20] + "..."
 
 
 # =========================================================
@@ -160,6 +201,9 @@ def chat_stream_api(request):
         last_order = history.chats.aggregate(Max("order_num"))["order_num__max"] or 0
         current_save_order = last_order + 1
 
+        # 👉 첫 메시지인지 여부 체크
+        is_first_message = (last_order == 0)
+
         # 2. [사용자 메시지 저장]
         user_chat = Chat.objects.create(
             history=history,
@@ -170,6 +214,13 @@ def chat_stream_api(request):
 
         # 다음 메시지(Tool이나 AI)가 저장될 순서 번호 준비
         current_save_order += 1
+
+        # 👉 [추가] 첫 메시지라면 LLM으로 채팅방 제목 생성
+        new_title = None
+        if is_first_message:
+            new_title = generate_history_title_by_llm(user_input)
+            history.description = new_title
+            history.save(update_fields=["description"])
 
         # 3. LangChain 메시지 변환 (컨텍스트 로드)
         db_chats = Chat.objects.filter(history=history).order_by("order_num")
@@ -192,6 +243,16 @@ def chat_stream_api(request):
                     {"type": "user_message_id", "chat_id": user_chat.chat_id}
                 ) + "\n"
 
+                # 👉 [추가] 새 제목이 만들어   졌으면 프론트에 한 번 보내기
+                if new_title is not None:
+                    yield json.dumps(
+                        {
+                            "type": "history_title",
+                            "history_id": history.history_id,
+                            "title": new_title,
+                        }
+                    ) + "\n"
+                    
                 for msg, metadata in agent_executor.stream(
                     {"messages": langchain_messages},
                     config=config,
@@ -399,15 +460,24 @@ def update_history_order(request):
             data = json.loads(request.body)
             ordered_ids = data.get("ordered_ids", [])
 
-            # 목록의 길이 (예: 10개면 10부터 시작해서 감소)
-            # 우리는 order_by('-order_num') 이므로, 숫자가 클수록 위에 뜸
             total_count = len(ordered_ids)
 
+            # 회원 / 비회원별로 필터 기준을 분리
+            if request.user.is_authenticated:
+                base_filter = {"user": request.user}
+            else:
+                if not request.session.session_key:
+                    request.session.save()
+                base_filter = {
+                    "session_id": request.session.session_key,
+                    "user__isnull": True,
+                }
+
             for index, hist_id in enumerate(ordered_ids):
-                # 순서대로 점수 부여 (1등에게 가장 높은 숫자)
-                new_order = total_count - index
+                new_order = total_count - index  # 위에 있을수록 숫자 큼
                 ChatHistory.objects.filter(
-                    history_id=hist_id, user=request.user
+                    history_id=hist_id,
+                    **base_filter,
                 ).update(order_num=new_order)
 
             return JsonResponse({"status": "success"})
@@ -415,6 +485,7 @@ def update_history_order(request):
             return JsonResponse({"status": "error", "message": str(e)})
 
     return JsonResponse({"error": "Method not allowed"}, status=405)
+
 
 
 # =========================================================
@@ -427,13 +498,44 @@ def delete_history_api(request):
             data = json.loads(request.body)
             history_id = data.get("history_id")
 
-            # 본인 것인지 확인 후 삭제
-            ChatHistory.objects.filter(
-                history_id=history_id, user=request.user
-            ).delete()
+            if not history_id:
+                return JsonResponse(
+                    {"status": "error", "message": "history_id가 없습니다."}
+                )
+
+            # 1) 회원인 경우: user 기준으로만 삭제
+            if request.user.is_authenticated:
+                deleted_count, _ = ChatHistory.objects.filter(
+                    history_id=history_id,
+                    user=request.user,
+                ).delete()
+
+            # 2) 비회원(게스트)인 경우: session_id + user is null 기준으로 삭제
+            else:
+                # 세션 키가 없으면 새로 생성
+                if not request.session.session_key:
+                    request.session.save()
+                session_id = request.session.session_key
+
+                deleted_count, _ = ChatHistory.objects.filter(
+                    history_id=history_id,
+                    session_id=session_id,
+                    user__isnull=True,
+                ).delete()
+
+            # 실제로 삭제된 게 없으면 에러 응답
+            if deleted_count == 0:
+                return JsonResponse(
+                    {
+                        "status": "error",
+                        "message": "삭제할 수 있는 대화가 없습니다.",
+                    }
+                )
 
             return JsonResponse({"status": "success"})
-        except:
-            return JsonResponse({"status": "error", "message": "Failed to delete"})
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
 
     return JsonResponse({"error": "Method not allowed"}, status=405)
+

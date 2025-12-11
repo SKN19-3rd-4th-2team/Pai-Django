@@ -30,9 +30,33 @@
         {% else %}
         <div class="chat-row ai-row">
             <div class="chat-message ai-message">
-                안녕하세요! 특허/비전 전문 AI입니다.<br>무엇을 도와드릴까요?
+            안녕하세요! 👋<br>
+            저는 <b>컴퓨터 비전 분야 특허에 특화된 AI 어시스턴트</b>입니다.<br>
+            사용자의 아이디어를 분석하고, 내부 특허·IPC DB를 활용해서<br>
+            <b>유사 특허 검색 · IPC 코드 추천 · IPC 코드 설명 · 기본 특허 실무 안내</b>를 도와드려요.<br>
+            <br>
+            <b>이런 걸 도와드릴 수 있어요</b><br>
+            - 발명 아이디어를 바탕으로 유사한 공개·등록 특허를 찾아 핵심만 요약해 드리기<br>
+            - 아이디어에 어울릴 만한 국제특허분류(IPC) 코드 후보를 추천해 드리기<br>
+            - 이미 알고 있는 IPC 코드(예: G06T 7/00, H04N 5/232)의 의미와 상위·하위 구조 설명<br>
+            - 특정 출원번호(예: 10-2023-0112930)의 대표 청구항을 모아서 요약 정리<br>
+            - 컴퓨터 비전 관련 특허 실무 개념을 이해하기 쉽게 풀어서 설명<br>
+            <br>
+            <b>예시로 이렇게 물어보실 수 있어요</b><br>
+            - "차량 전방 카메라로 보행자를 인식해서 자동 제동하는 시스템인데, 비슷한 특허를 찾아줘."<br>
+            - "이 아이디어에 어울리는 IPC 코드를 추천해줘."<br>
+            - "IPC 코드 G06T 7/00이 어떤 기술을 다루는지 설명해줘."<br>
+            - "출원번호 1020230019980 특허의 주요 청구항들을 요약해줘."<br>
+            <br><b>참고해주세요</b><br>
+            - 현재 DB는 주로 <b>컴퓨터 비전 관련 특허</b>를 중심으로 되어 있어서,<br>
+            화학·의료·농기계 등 다른 분야 특허는 충분하지 않을 수 있어요.<br>
+            - 실제 출원, 권리범위 판단처럼 법적 책임이 필요한 결정은<br>
+            반드시 변리사의 검토와 함께 진행해 주세요.<br>
+            <br>
+            무엇을 도와드릴까요?
             </div>
         </div>
+
         {% endif %}
     </div>
 
@@ -408,10 +432,18 @@
                         else if (data.type === 'tool_call') {
                             createToolStatus(data.tool_name);
                         }
-
+                        // ✅ 여기 추가: 제목 요약 이벤트 처리
+                        else if (data.type === 'history_title') {
+                            // chat_interface.html 에서 정의한 전역 함수 사용
+                            if (typeof updateHistoryTitle === 'function') {
+                                updateHistoryTitle(data.history_id, data.title);
+                            }
+                        }
                         scrollToBottom();
 
-                    } catch (e) { }
+                    } catch (e) {
+                        console.error(e);
+                    }
                 }
             }
 
