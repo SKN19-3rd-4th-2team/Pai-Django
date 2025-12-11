@@ -1,178 +1,139 @@
+{% extends 'layout/base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="ko">
+{% block title %}회원탈퇴 - Pai{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Pai | 회원탈퇴</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/common.css' %}">
-    <link rel="stylesheet" href="{% static 'css/main_style.css' %}">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+{% block extra_css %}
+<style>
+    /* ===== 메인 콘텐츠 ===== */
+    .page-wrapper {
+        min-height: calc(100vh - 60px);
+        padding: 30px 60px 50px 60px;
+        margin-top: 60px; /* 네비게이션 바 높이만큼 여백 */
+    }
 
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
-                "Noto Sans KR", sans-serif;
-            background-color: #ffffff;
-            padding-top: 80px; /* 네비게이션 바 공간 */
-        }
+    .page-title {
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 12px;
+    }
 
-        /* ===== 메인 콘텐츠 ===== */
-        .page-wrapper {
-            min-height: calc(100vh - 80px);
-            padding: 30px 60px 50px 60px;
-        }
+    .content-box {
+        border: 2px solid #a6b8d9;
+        border-radius: 20px;
+        padding: 30px 45px 60px 45px;
+        font-size: 15px;
+        line-height: 1.6;
+    }
 
-        .page-title {
-            font-size: 13px;
-            color: #555;
-            margin-bottom: 12px;
-        }
+    .content-box ol {
+        margin-left: 18px;
+    }
 
-        .content-box {
-            border: 2px solid #a6b8d9;
-            border-radius: 20px;
-            padding: 30px 45px 60px 45px;
-            font-size: 15px;
-            line-height: 1.6;
-        }
+    .content-box li {
+        margin-bottom: 12px;
+    }
 
-        .content-box ol {
-            margin-left: 18px;
-        }
+    .bullet-list {
+        list-style-type: disc;
+        margin-left: 18px;
+        margin-top: 6px;
+    }
 
-        .content-box li {
-            margin-bottom: 12px;
-        }
+    .bullet-list li {
+        margin-bottom: 4px;
+    }
 
-        .bullet-list {
-            list-style-type: disc;
-            margin-left: 18px;
-            margin-top: 6px;
-        }
+    .withdraw-info {
+        margin-top: 4px;
+        margin-left: 4px;
+    }
 
-        .bullet-list li {
-            margin-bottom: 4px;
-        }
+    .button-area {
+        text-align: center;
+        margin-top: 32px;
+    }
 
-        .withdraw-info {
-            margin-top: 4px;
-            margin-left: 4px;
-        }
+    .withdraw-btn {
+        display: inline-block;
+        min-width: 180px;
+        padding: 12px 40px;
+        border-radius: 24px;
+        border: none;
+        background-color: #4A5B7D;
+        color: #ffffff;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
 
-        .button-area {
-            text-align: center;
-            margin-top: 32px;
-        }
+    .withdraw-btn:hover {
+        background-color: #3b4c6e;
+    }
 
-        .withdraw-btn {
-            display: inline-block;
-            min-width: 180px;
-            padding: 12px 40px;
-            border-radius: 24px;
-            border: none;
-            background-color: #4A5B7D;
-            color: #ffffff;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+    /* ===== 모달 ===== */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 0.35);
+        z-index: 1000;
+    }
 
-        .withdraw-btn:hover {
-            background-color: #3b4c6e;
-        }
+    .modal-box {
+        background-color: #ffffff;
+        border-radius: 22px;
+        padding: 40px 55px 32px 55px;
+        text-align: center;
+        min-width: 420px;
+        max-width: 520px;
+        border: 1px solid #444;
+    }
 
-        /* ===== 모달 ===== */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.35);
-            z-index: 1000;
-        }
+    .modal-text {
+        font-size: 17px;
+        line-height: 1.6;
+        margin-bottom: 26px;
+    }
 
-        .modal-box {
-            background-color: #ffffff;
-            border-radius: 22px;
-            padding: 40px 55px 32px 55px;
-            text-align: center;
-            min-width: 420px;
-            max-width: 520px;
-            border: 1px solid #444;
-        }
+    .modal-btn-area {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+    }
 
-        .modal-text {
-            font-size: 17px;
-            line-height: 1.6;
-            margin-bottom: 26px;
-        }
+    .modal-btn {
+        min-width: 140px;
+        padding: 11px 20px;
+        border-radius: 25px;
+        border: none;
+        font-size: 15px;
+        cursor: pointer;
+    }
 
-        .modal-btn-area {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-        }
+    .modal-confirm {
+        background-color: #4A5B7D;
+        color: #fff;
+    }
+    
+    .modal-confirm:hover {
+        background-color: #3b4c6e;
+    }
 
-        .modal-btn {
-            min-width: 140px;
-            padding: 11px 20px;
-            border-radius: 25px;
-            border: none;
-            font-size: 15px;
-            cursor: pointer;
-        }
+    .modal-cancel {
+        background-color: #4f4f4f;
+        color: #fff;
+    }
 
-        .modal-confirm {
-            background-color: #4A5B7D;
-            color: #fff;
-        }
-        
-        .modal-confirm:hover {
-            background-color: #3b4c6e;
-        }
+    .modal-btn:hover {
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
 
-        .modal-cancel {
-            background-color: #4f4f4f;
-            color: #fff;
-        }
-
-        .modal-btn:hover {
-            opacity: 0.9;
-        }
-    </style>
-</head>
-
-<body>
-
-    <!-- 상단 헤더 -->
-    <header class="header">
-        <div class="header-left">
-            <!-- 로고 이미지 쓰고 싶으면 아래 img 주석 해제해서 static 경로에 맞게 변경 -->
-            <!-- <img src="{% static 'img/pai_logo.png' %}" alt="P.ai 로고" style="height:40px;"> -->
-            <div>
-                <div class="logo-text-main">Pai</div>
-                <div class="logo-text-sub">PATENT AI</div>
-            </div>
-        </div>
-        <div class="header-right">
-            <form action="{% url 'chat:chat_interface' %}">
-                <button type="submit" class="header-btn">채팅하기</button>
-            </form>
-            <form action="{% url 'account:logout' %}" method="post" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="header-btn">로그아웃</button>
-            </form>
-        </div>
-    </header>
+{% block content %}
 
     <!-- 메인 내용 -->
     <div class="page-wrapper">
@@ -275,7 +236,7 @@
             deleteForm.submit();  // POST 요청 전송
         });
     </script>
+{% endblock %}
 
-</body>
-
-</html>
+{% block extra_js %}
+{% endblock %}

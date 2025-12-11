@@ -118,3 +118,7 @@ def logout_view(request):
     """
     logout(request)
     return redirect("main:index")  # 메인 페이지로 이동
+
+
+def withdraw_final(request):
+    pass
