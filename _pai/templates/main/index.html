@@ -25,7 +25,7 @@
             {% if user.is_authenticated %}
                 <a href="{% url 'chat:chat_interface' %}" class="btn-start" style="position: relative; top: 20px;">채팅 시작하기</a>
             {% else %}
-                <a href="{% url 'account:login' %}" class="btn-start" style="position: relative; top: 20px;">시작하기</a>
+                <a href="{% url 'account:login' %}" class="btn-start" style="position: relative; top: 1px;">시작하기</a>
             {% endif %}
         </div>
     </section>

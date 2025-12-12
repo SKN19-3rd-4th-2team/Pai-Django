@@ -7,7 +7,7 @@
         <div class="navbar-menu">
             {% if user.is_authenticated %}
                 <!-- 로그인된 상태 -->
-                <span class="nav-welcome">{{ user.first_name|default:user.username }}님 환영합니다</span>
+                <span class="nav-welcome">👤 {{ user.first_name|default:user.username }}님 환영합니다</span>
                 <a href="{% url 'account:myinfo' %}" class="nav-link">마이페이지</a>
                 <a href="{% url 'account:logout' %}" class="nav-link">로그아웃</a>
             {% else %}

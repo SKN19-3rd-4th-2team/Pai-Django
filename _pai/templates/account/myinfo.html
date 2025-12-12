@@ -1,174 +1,95 @@
 {% extends 'layout/account_base.html' %}
 
-{% block title %}Pai | 마이페이지{% endblock %}
+{% block title %}마이페이지 - Pai{% endblock %}
 
 {% block content %}
 <!-- 내 정보 확인 -->
-<div class="info-container">
-    <h2 class="page-title">내 정보 확인</h2>
-
-    <div class="info-card">
-        <div class="info-group">
-            <label class="info-label">ID</label>
-            <div class="info-value">{{ user.username }}</div>
-        </div>
-
-        <div class="info-group">
-            <label class="info-label">닉네임</label>
-            <div class="info-value">{{ user.first_name|default:"설정되지 않음" }}</div>
-        </div>
-
-        <div class="info-group">
-            <label class="info-label">가입일</label>
-            <div class="info-value">{{ user.date_joined|date:"Y년 m월 d일" }}</div>
-        </div>
-
-        {% if message %}
-        <div class="success-message">{{ message }}</div>
-        {% endif %}
-
-        <div class="button-group">
-            <button type="button" class="primary-btn" onclick="location.href='#'">정보 수정</button>
-            <button type="button" class="chat-btn" onclick="location.href='{% url 'chat:chat_interface' %}'">채팅으로</button>
-        </div>
-        
-        <div class="danger-zone">
-            <h3 class="danger-title">위험 구역</h3>
-            <p class="danger-desc">회원탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.</p>
-            <button type="button" class="danger-btn" onclick="confirmWithdraw()">회원탈퇴</button>
-        </div>
-    </div>
+<div class="form-group">
+    <label>ID</label>
+    <div class="input-box" style="background-color: #f8f9fa; cursor: not-allowed;">{{ user.username }}</div>
 </div>
 
-<style>
-.info-container {
-    max-width: 500px;
-    margin: 0 auto;
-}
+<div class="form-group">
+    <label>닉네임</label>
+    <div class="input-box" style="background-color: #f8f9fa; cursor: not-allowed;">{{ user.first_name|default:"설정되지 않음" }}</div>
+</div>
 
-.page-title {
-    text-align: center;
-    margin-bottom: 30px;
-    color: #4A5B7D;
-    font-size: 28px;
-    font-weight: 700;
-}
+{% if success_message %}
+<div style="background-color: #d4edda; color: #155724; padding: 12px; border-radius: 20px; margin: 16px 0; text-align: center; font-size: 12px;">
+    {{ success_message }}
+</div>
+{% endif %}
 
-.info-card {
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-}
+<!-- 정보 수정 폼 -->
+<form method="POST">
+    {% csrf_token %}
+    
+    <div class="form-group">
+        <label for="id_nickname">새 별명 (선택사항)</label>
+        {{ profile_form.nickname }}
+        {% if profile_form.nickname.errors %}
+            <div class="error-message">
+                {% for error in profile_form.nickname.errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
 
-.info-group {
-    margin-bottom: 25px;
-}
+    <div class="line-wrap">
+        <div class="line"></div>
+    </div>
+    
+    <div class="form-group">
+        <label for="id_old_password">현재 비밀번호 (비밀번호 변경시 필수)</label>
+        {{ password_form.old_password }}
+        {% if password_form.old_password.errors %}
+            <div class="error-message">
+                {% for error in password_form.old_password.errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="form-group">
+        <label for="id_new_password1">새 비밀번호 (선택사항)</label>
+        {{ password_form.new_password1 }}
+        {% if password_form.new_password1.errors %}
+            <div class="error-message">
+                {% for error in password_form.new_password1.errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="form-group">
+        <label for="id_new_password2">새 비밀번호 확인</label>
+        {{ password_form.new_password2 }}
+        {% if password_form.new_password2.errors %}
+            <div class="error-message">
+                {% for error in password_form.new_password2.errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <button type="submit" name="update_info" class="primary-btn">정보 변경</button>
+</form>
 
-.info-label {
-    display: block;
-    font-weight: 600;
-    color: #4A5B7D;
-    margin-bottom: 8px;
-    font-size: 14px;
-}
+<div class="line-wrap">
+    <div class="line"></div>
+</div>
 
-.info-value {
-    padding: 12px 16px;
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 6px;
-    color: #495057;
-    font-size: 16px;
-}
+<button type="button" class="secondary-btn" onclick="location.href='{% url 'chat:chat_interface' %}'">채팅으로 돌아가기</button>
 
-.success-message {
-    background-color: #d4edda;
-    color: #155724;
-    padding: 12px 16px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.button-group {
-    display: flex;
-    gap: 12px;
-    margin-top: 30px;
-}
-
-.secondary-btn {
-    flex: 1;
-    padding: 12px 24px;
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.secondary-btn:hover {
-    background-color: #5a6268;
-}
-
-.chat-btn {
-    flex: 1;
-    padding: 12px 24px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.chat-btn:hover {
-    background-color: #218838;
-}
-
-.danger-zone {
-    margin-top: 40px;
-    padding: 25px;
-    border: 2px solid #dc3545;
-    border-radius: 8px;
-    background-color: #fff5f5;
-}
-
-.danger-title {
-    color: #dc3545;
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-.danger-desc {
-    color: #721c24;
-    font-size: 14px;
-    margin-bottom: 15px;
-    line-height: 1.5;
-}
-
-.danger-btn {
-    padding: 10px 20px;
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.danger-btn:hover {
-    background-color: #c82333;
-}
-</style>
+<div style="margin-top: 30px; padding: 20px; border: 2px solid #dc3545; border-radius: 20px; background-color: #fff5f5;">
+    <h3 style="color: #dc3545; font-size: 14px; font-weight: 700; margin-bottom: 8px;">위험 구역</h3>
+    <p style="color: #721c24; font-size: 11px; margin-bottom: 12px; line-height: 1.5;">회원탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.</p>
+    <button type="button" style="padding: 8px 16px; background-color: #dc3545; color: white; border: none; border-radius: 15px; font-size: 11px; font-weight: 600; cursor: pointer;" onclick="confirmWithdraw()">회원탈퇴</button>
+</div>
 
 <script>
 function confirmWithdraw() {

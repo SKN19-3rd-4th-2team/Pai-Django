@@ -82,22 +82,39 @@ def myinfo(request):
     password_form = PasswordChangeForm(user)
 
     if request.method == "POST":
-        # 어떤 버튼이 눌렸는지 name으로 구분
-        if "profile_submit" in request.POST:
-            # 별명 수정 폼
+        if "update_info" in request.POST:
+            # 통합 정보 수정 처리
             profile_form = ProfileUpdateForm(request.POST, user=user)
-            if profile_form.is_valid():
-                profile_form.save()
-                success_message = "별명이 성공적으로 변경되었습니다."
-
-        elif "password_submit" in request.POST:
-            # 비밀번호 변경 폼
             password_form = PasswordChangeForm(user, request.POST)
-            if password_form.is_valid():
-                changed_user = password_form.save()
-                # 비밀번호를 바꿔도 로그인 풀리지 않게 세션 유지
-                update_session_auth_hash(request, changed_user)
+            
+            profile_changed = False
+            password_changed = False
+            
+            # 별명 변경 처리 (별명이 입력된 경우에만)
+            if profile_form.is_valid():
+                new_nickname = profile_form.cleaned_data.get('nickname', '').strip()
+                if new_nickname and new_nickname != user.first_name:
+                    profile_form.save()
+                    profile_changed = True
+            
+            # 비밀번호 변경 처리 (새 비밀번호가 입력된 경우에만)
+            new_password1 = request.POST.get('new_password1', '').strip()
+            if new_password1:  # 새 비밀번호가 입력된 경우에만 검증
+                if password_form.is_valid():
+                    changed_user = password_form.save()
+                    # 비밀번호를 바꿔도 로그인 풀리지 않게 세션 유지
+                    update_session_auth_hash(request, changed_user)
+                    password_changed = True
+            
+            # 성공 메시지 설정
+            if profile_changed and password_changed:
+                success_message = "별명과 비밀번호가 성공적으로 변경되었습니다."
+            elif profile_changed:
+                success_message = "별명이 성공적으로 변경되었습니다."
+            elif password_changed:
                 success_message = "비밀번호가 성공적으로 변경되었습니다."
+            elif not new_password1 and not profile_form.cleaned_data.get('nickname', '').strip():
+                success_message = "변경할 정보를 입력해주세요."
 
     context = {
         "user_obj": user,
