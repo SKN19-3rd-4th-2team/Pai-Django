@@ -6,14 +6,6 @@ from django.contrib.auth import update_session_auth_hash
 
 from .forms import SignupForm, LoginForm, ProfileUpdateForm
 
-# from django.contrib.auth import logout as auth_logout
-
-from django.http import HttpResponse
-
-from .forms import SignupForm, LoginForm
-
-# 수정 부분: signup(), login()
-
 
 # 회원가입
 def signup(request):
@@ -44,16 +36,19 @@ def login(request):
         if form.is_valid():  # 유효성 검증 통과 시
             user = form.get_user()
             auth_login(request, user)  # 로그인 처리
-            return redirect("chat:chat_interface")  # chat 페이지로 이동. 수정 부분
+            return redirect("chat:chat_interface")  # chat 페이지로 이동.
 
     else:
         form = LoginForm()
 
     return render(request, "account/login.html", {"form": form})
 
+# 회원탈퇴 페이지
 def withdraw(request):
     return render(request, "account/withdraw.html")
 
+
+# 회원탈퇴
 @login_required
 def withdraw_final(request):
     if request.method == "POST":
@@ -63,6 +58,8 @@ def withdraw_final(request):
         return redirect("main:index") 
     return redirect("account:mypage")  # POST가 아니면 마이페이지로
 
+
+# 로그아웃
 @login_required
 def logout_view(request):
     """
@@ -115,15 +112,3 @@ def myinfo(request):
         "success_message": success_message,
     }
     return render(request, "account/myinfo.html", context)
-
-
-
-def logout_view(request):
-    """
-    로그아웃 처리:
-    1. 현재 사용자의 세션 데이터를 삭제합니다 (DB의 django_session 테이블에서 제거).
-    2. 브라우저의 sessionid 쿠키도 무효화됩니다.
-    3. 메인 페이지로 이동합니다.
-    """
-    logout(request)
-    return redirect("main:index")  # 메인 페이지로 이동
