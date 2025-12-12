@@ -228,7 +228,7 @@ def chat_stream_api(request):
         # =====================================================
         if request.user.is_authenticated:
             # 로그인한 유저라면 username 을 닉네임으로 사용
-            user_nickname = request.user.username or "사용자"
+            user_nickname = request.user.first_name or "사용자"
         else:
             # 비회원은 그냥 '게스트' 라고 인식
             user_nickname = "게스트"

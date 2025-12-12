@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, logout, login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from django.urls import reverse
 
 from .forms import SignupForm, LoginForm, ProfileUpdateForm
 
@@ -126,5 +127,6 @@ def myinfo(request):
         "profile_form": profile_form,
         "password_form": password_form,
         "success_message": success_message,
+        "chat_interface_url": reverse("chat:chat_interface"),
     }
     return render(request, "account/myinfo.html", context)

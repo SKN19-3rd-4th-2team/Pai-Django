@@ -83,7 +83,11 @@
     <div class="line"></div>
 </div>
 
-<button type="button" class="secondary-btn" onclick="location.href='{% url 'chat:chat_interface' %}'">채팅으로 돌아가기</button>
+<button type="button"
+        class="secondary-btn"
+        onclick="location.href='{{ chat_interface_url }}'">
+    채팅으로 돌아가기
+</button>
 
 <div style="margin-top: 30px; padding: 20px; border: 2px solid #dc3545; border-radius: 20px; background-color: #fff5f5;">
     <h3 style="color: #dc3545; font-size: 14px; font-weight: 700; margin-bottom: 8px;">위험 구역</h3>
