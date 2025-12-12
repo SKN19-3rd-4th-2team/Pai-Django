@@ -148,6 +148,17 @@
             transition: opacity 0.2s;
         }
 
+        /* 채팅 제목 인라인 수정 input */
+        .history-title-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 14px;
+            color: #333;
+        }
+
         /* 호버 시에만 보임 */
         .history-item-container:hover .menu-btn {
             opacity: 1;
@@ -219,6 +230,112 @@
             box-shadow: none !important;
             background-color: transparent !important;
         }
+
+        /* 사이드바 접힘 상태 */
+        .main-container.sidebar-collapsed .sidebar {
+            width: 0;
+            padding: 0;
+            margin: 0;
+            border-right: none;
+            overflow: hidden;
+        }
+
+        /* 접힘 상태에서도 채팅 영역은 자연스럽게 꽉 차게 */
+        .main-container.sidebar-collapsed .chat-area {
+            flex: 1;
+        }
+
+        /* 사이드바 헤더 (채팅 목록 + 정렬 + 닫기 버튼) */
+        .sidebar-header {
+            font-size: 13px;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sidebar-header-title {
+            font-size: inherit;
+            font-weight: inherit;
+            color: inherit;
+        }
+
+        /* 정렬(⇅) 버튼 – 아직 기능은 없고 자리만 */
+        .sidebar-sort-btn {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            color: #6b7280;
+            padding: 0 2px;
+        }
+
+        .sidebar-sort-btn:hover {
+            color: #111827;
+        }
+
+        /* 사이드바 안쪽 닫기 버튼 (<) */
+        .sidebar-close-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            border: 1px solid #d0d3dd;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #4a5c8d;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            padding: 0;
+        }
+
+        /* 사이드바 밖에 떠 있는 열기 버튼 (>) */
+        .sidebar-open-btn {
+            position: absolute;
+            left: 0px;
+            /* 사이드바 너비랑 맞춰서 경계에 붙이기 */
+            top: 170px;
+            /* 채팅 목록 헤더 높이에 맞게 조금 조절해도 됨 */
+            transform: translateX(50%);
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            border: 1px solid #d0d3dd;
+            background: #ffffff;
+            display: none;
+            /* 기본은 숨김, 접혔을 때만 보이게 */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #4a5c8d;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            z-index: 20;
+            padding: 0;
+        }
+
+        .sidebar-open-btn:hover {
+            background-color: #edf0f8;
+        }
+
+        /* 접힌 상태일 때: 열기 버튼만 보이고, 닫기 버튼은 숨기기 */
+        .main-container.sidebar-collapsed .sidebar-open-btn {
+            display: flex;
+        }
+
+        .main-container.sidebar-collapsed .sidebar-close-btn {
+            display: none;
+        }
     </style>
 </head>
 
@@ -231,25 +348,39 @@
         <aside class="sidebar">
             <a href="{% url 'chat:new_chat' %}" class="new-chat-btn"><span>💬</span> 새 채팅</a>
 
-            <div class="list-header">
-                <span>채팅 목록</span>
-                <span title="드래그하여 순서를 변경할 수 있습니다">⇅</span>
+            <div class="sidebar-header">
+                <div class="sidebar-header-left">
+                    <span class="sidebar-header-title">채팅 목록</span>
+                    <!-- 정렬 아이콘: 나중에 기능 붙일 예정 -->
+                    <button type="button" class="sidebar-sort-btn" title="정렬 (추후 제공)">
+                        ⇅
+                    </button>
+                </div>
+
+                <!-- 사이드바 닫기 버튼 (<) -->
+                <button type="button" id="sidebar-close-btn" class="sidebar-close-btn" aria-label="사이드바 닫기"
+                    title="사이드바 닫기">
+                    &lt;
+                </button>
             </div>
+
 
             <div class="history-list" id="history-list">
                 {% for hist in history_list %}
                 <div class="history-item-container {% if hist.history_id == selected_history_id %}active{% endif %}"
-                    draggable="true"
-                    data-id="{{ hist.history_id }}"
-                    id="history-item-{{ hist.history_id }}">
+                    draggable="true" data-id="{{ hist.history_id }}" id="history-item-{{ hist.history_id }}">
 
-                    <a href="?history_id={{ hist.history_id }}" class="history-link">
+                    <a href="?history_id={{ hist.history_id }}" class="history-link" draggable="false">
                         <span class="history-title">{{ hist.description }}</span>
                     </a>
 
                     <button class="menu-btn" onclick="toggleMenu(event, '{{ hist.history_id }}')">•••</button>
 
                     <div class="context-menu" id="menu-{{ hist.history_id }}">
+                        <div class="context-item"
+                            onclick="startRenameHistory('{{ hist.history_id }}', '{{ hist.description|escapejs }}')">
+                            ✏️ 채팅 제목 수정하기
+                        </div>
                         <div class="context-item" onclick="deleteHistory('{{ hist.history_id }}')">
                             🗑️ 삭제하기
                         </div>
@@ -264,6 +395,12 @@
 
             </div>
         </aside>
+
+        <!-- 사이드바가 접힌 상태에서만 보이는 열기 버튼 (>) -->
+        <button type="button" id="sidebar-open-btn" class="sidebar-open-btn" aria-label="사이드바 열기" title="사이드바 열기">
+            &gt;
+        </button>
+
 
         <main class="chat-area">
             {% include 'chat/chat_component.html' %}
@@ -316,27 +453,149 @@
             } catch (e) { console.error(e); }
         }
 
+        // 2-1. 채팅방 제목 인라인 수정 로직
+        function startRenameHistory(id, currentTitle) {
+            // 메뉴 닫기
+            document.querySelectorAll('.context-menu').forEach(el => el.classList.remove('show'));
+
+            const item = document.querySelector(`#history-item-${id}`);
+            if (!item) return;
+
+            const link = item.querySelector('.history-link');
+            const titleSpan = item.querySelector('.history-title');
+            if (!link || !titleSpan) return;
+
+            // 이미 수정 중이면 기존 input에 포커스만
+            const existingInput = item.querySelector('.history-title-input');
+            if (existingInput) {
+                existingInput.focus();
+                existingInput.select();
+                return;
+            }
+
+            // 인라인 input 생성
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'history-title-input';
+            input.value = (currentTitle || titleSpan.textContent || '').trim();
+            input.setAttribute('data-id', id);
+
+            // 링크는 잠시 숨기고, input을 그 자리에 끼워 넣기
+            link.style.display = 'none';
+            item.insertBefore(input, link);
+
+            input.focus();
+
+            // 커서를 맨 끝으로 이동 (전체 드래그 X)
+            const length = input.value.length;
+            try {
+                input.setSelectionRange(length, length);
+            } catch (e) {
+                // setSelectionRange를 지원하지 않는 브라우저 대비 (거의 없지만)
+                console.warn("setSelectionRange not supported", e);
+            }
+
+            // 취소 (ESC 또는 빈 값 등)
+            const cancelEdit = () => {
+                item.removeChild(input);
+                link.style.display = '';
+            };
+
+            // 저장 (Enter / blur)
+            let isSubmitting = false;
+
+            const submitEdit = async () => {
+                if (isSubmitting) return;
+                isSubmitting = true;
+
+                const newTitle = (input.value || '').trim();
+
+                // 변경 없거나 공백이면 원래대로
+                if (!newTitle || newTitle === (currentTitle || '').trim()) {
+                    cancelEdit();
+                    return;
+                }
+
+                try {
+                    const response = await fetch("/chat/api/history/rename/", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            history_id: id,
+                            title: newTitle,
+                        }),
+                    });
+
+                    const res = await response.json();
+
+                    if (res.status === "success") {
+                        // DOM 업데이트
+                        titleSpan.textContent = newTitle;
+                        // 혹시 다른 곳에서 쓸 수도 있으니 헬퍼도 호출
+                        if (typeof updateHistoryTitle === 'function') {
+                            updateHistoryTitle(id, newTitle);
+                        }
+                    } else {
+                        alert("제목 수정 실패: " + (res.message || ""));
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("오류 발생");
+                } finally {
+                    cancelEdit();
+                }
+            };
+
+            // 키보드 이벤트
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submitEdit();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cancelEdit();
+                }
+            });
+
+            // 포커스가 빠져나가면 자동 저장 (또는 되돌리기)
+            input.addEventListener('blur', () => {
+                // blur 됐을 때도 저장 시도
+                submitEdit();
+            });
+        }
+
+
         // === 3. Drag & Drop 순서 변경 로직 ===
         const listContainer = document.getElementById('history-list');
         let draggedItem = null;
 
         // (A) 드래그 시작
         listContainer.addEventListener('dragstart', (e) => {
-            draggedItem = e.target.closest('.history-item-container');
-            if (draggedItem) {
-                e.target.classList.add('dragging');
-                // 드래그 중인 항목의 ID 등 데이터 전송 가능
+            // 항상 가장 가까운 history-item-container를 기준으로 잡기
+            const item = e.target.closest('.history-item-container');
+            if (!item) return;
+
+            draggedItem = item;
+            draggedItem.classList.add('dragging');
+
+            // (선택) 링크 기본 드래그 이미지 같은 거 방지용
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', '');
             }
         });
 
         // (B) 드래그 종료
         listContainer.addEventListener('dragend', async (e) => {
-            e.target.classList.remove('dragging');
-            draggedItem = null;
+            if (!draggedItem) return;
+
+            draggedItem.classList.remove('dragging');
 
             // [중요] 변경된 순서대로 ID 수집해서 서버로 전송
             const items = listContainer.querySelectorAll('.history-item-container');
             const orderedIds = Array.from(items).map(item => item.getAttribute('data-id'));
+
+            draggedItem = null;
 
             // API 호출 (순서 저장)
             await fetch('/chat/api/history/update_order/', {
@@ -348,17 +607,19 @@
 
         // (C) 드래그 오버 (자리 바꾸기 로직)
         listContainer.addEventListener('dragover', (e) => {
-            e.preventDefault(); // 필수: drop 허용을 위해
+            e.preventDefault(); // 필수: drop 허용
+
+            if (!draggedItem) return;
 
             const afterElement = getDragAfterElement(listContainer, e.clientY);
-            const currentDraggable = document.querySelector('.dragging');
 
             if (afterElement == null) {
-                listContainer.appendChild(currentDraggable);
+                listContainer.appendChild(draggedItem);
             } else {
-                listContainer.insertBefore(currentDraggable, afterElement);
+                listContainer.insertBefore(draggedItem, afterElement);
             }
         });
+
 
         // 마우스 위치에 따라 어떤 요소 앞에 넣을지 계산하는 헬퍼 함수
         function getDragAfterElement(container, y) {
@@ -375,9 +636,7 @@
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
-        /* ===========================================================
-           === 4. LLM 제목 요약 업데이트 (핵심 추가 기능) ===
-           =========================================================== */
+        // === 4. LLM 제목 요약 업데이트 (핵심 추가 기능) ===
         function updateHistoryTitle(historyId, newTitle) {
             const item = document.querySelector(`#history-item-${historyId}`);
             if (!item) return;
@@ -387,6 +646,30 @@
                 titleElem.textContent = newTitle;
             }
         }
+
+        // === 5. 사이드바 접기 / 열기 ===
+        (function () {
+            const mainContainer = document.querySelector('.main-container');
+            const closeBtn = document.getElementById('sidebar-close-btn'); // 안쪽 <
+            const openBtn = document.getElementById('sidebar-open-btn');   // 바깥쪽 >
+
+            if (!mainContainer || !closeBtn || !openBtn) return;
+
+            function setCollapsed(collapsed) {
+                if (collapsed) {
+                    mainContainer.classList.add('sidebar-collapsed');
+                } else {
+                    mainContainer.classList.remove('sidebar-collapsed');
+                }
+            }
+
+            // 닫기(<) → 접기
+            closeBtn.addEventListener('click', () => setCollapsed(true));
+
+            // 열기(>) → 다시 펼치기
+            openBtn.addEventListener('click', () => setCollapsed(false));
+        })();
+
     </script>
 
 </body>

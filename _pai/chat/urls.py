@@ -15,4 +15,9 @@ urlpatterns = [
         name="update_history_order",
     ),
     path("api/history/delete/", views.delete_history_api, name="delete_history_api"),
+    path(
+        "api/history/rename/",
+        views.rename_history_api,
+        name="rename_history_api",
+    ),
 ]

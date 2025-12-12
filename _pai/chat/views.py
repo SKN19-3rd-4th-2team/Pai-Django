@@ -563,3 +563,50 @@ def delete_history_api(request):
 
     return JsonResponse({"error": "Method not allowed"}, status=405)
 
+
+
+# =========================================================
+# API: 채팅방 제목 수정 (회원 + 비회원 공통)
+# =========================================================
+@csrf_exempt
+def rename_history_api(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        history_id = data.get("history_id")
+        new_title = (data.get("title") or "").strip()
+
+        if not history_id or not new_title:
+            return JsonResponse(
+                {"status": "error", "message": "history_id 또는 제목이 없습니다."}
+            )
+
+        # 회원 / 비회원 기준 동일하게 맞추기
+        if request.user.is_authenticated:
+            base_filter = {"user": request.user}
+        else:
+            # 세션 키 없으면 생성
+            if not request.session.session_key:
+                request.session.save()
+            base_filter = {
+                "session_id": request.session.session_key,
+                "user__isnull": True,
+            }
+
+        # description 필드를 채팅 제목으로 사용 중
+        updated = ChatHistory.objects.filter(
+            history_id=history_id,
+            **base_filter,
+        ).update(description=new_title)
+
+        if updated == 0:
+            return JsonResponse(
+                {"status": "error", "message": "수정할 수 있는 대화가 없습니다."}
+            )
+
+        return JsonResponse({"status": "success", "title": new_title})
+
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
