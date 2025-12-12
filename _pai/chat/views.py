@@ -222,10 +222,35 @@ def chat_stream_api(request):
             history.description = new_title
             history.save(update_fields=["description"])
 
+        # =====================================================
         # 3. LangChain 메시지 변환 (컨텍스트 로드)
+        #    + 여기서 "사용자 닉네임" / "모델 이름 Pai" 주입
+        # =====================================================
+        if request.user.is_authenticated:
+            # 로그인한 유저라면 username 을 닉네임으로 사용
+            user_nickname = request.user.username or "사용자"
+        else:
+            # 비회원은 그냥 '게스트' 라고 인식
+            user_nickname = "게스트"
+
+        # 기존 SYSTEM_PROMPT 에 대화/호칭 관련 지침을 덧붙인 버전
+        dynamic_system_prompt = SYSTEM_PROMPT + f"""
+
+------------------------------------
+[대화/호칭 관련 추가 지침]
+------------------------------------
+- 너의 이름은 "Pai" 이다. (Patent AI 의 줄임말)
+  필요할 때 "저는 특허 AI 어시스턴트 Pai입니다."처럼 자신을 소개해도 된다.
+- 현재 사용자의 닉네임(표시 이름)은 "{user_nickname}" 이다.
+- 답변할 때는 존댓말을 사용하고,
+  너무 과하게 반복하지 않는 선에서 자연스럽게 "{user_nickname}님"이라고 불러 준다.
+- 단, 매 문장마다 부르는 것은 피하고, 필요할 때 한두 번 정도만 사용한다.
+"""
+
         db_chats = Chat.objects.filter(history=history).order_by("order_num")
         langchain_messages = convert_db_chats_to_langchain(
-            db_chats, system_prompt=SYSTEM_PROMPT
+            db_chats,
+            system_prompt=dynamic_system_prompt,  # ← 여기! 기존 SYSTEM_PROMPT 대신
         )
 
         config = {"configurable": {"thread_id": str(history.history_id)}}
@@ -243,7 +268,7 @@ def chat_stream_api(request):
                     {"type": "user_message_id", "chat_id": user_chat.chat_id}
                 ) + "\n"
 
-                # 👉 [추가] 새 제목이 만들어   졌으면 프론트에 한 번 보내기
+                # 👉 [추가] 새 제목이 만들어졌으면 프론트에 한 번 보내기
                 if new_title is not None:
                     yield json.dumps(
                         {
@@ -252,7 +277,8 @@ def chat_stream_api(request):
                             "title": new_title,
                         }
                     ) + "\n"
-                    
+
+                # LangGraph 에이전트 스트리밍
                 for msg, metadata in agent_executor.stream(
                     {"messages": langchain_messages},
                     config=config,
@@ -288,8 +314,7 @@ def chat_stream_api(request):
                             {"type": "tool_result", "length": len(content_str)}
                         ) + "\n"
 
-                        # 2. [여기!] DB에 저장
-                        # 사용자는 안 보지만 DB에는 기록됨 (type='TOOLS')
+                        # 2. DB에 저장 (type='TOOLS')
                         Chat.objects.create(
                             history=history,
                             type="TOOLS",
@@ -306,7 +331,6 @@ def chat_stream_api(request):
                         content=full_ai_response,
                         order_num=current_save_order,
                     )
-                    # current_save_order += 1 (필요하다면)
 
             except Exception as e:
                 yield json.dumps({"type": "error", "message": str(e)}) + "\n"
