@@ -120,10 +120,3 @@ def logout_view(request):
     return redirect("main:index")  # 메인 페이지로 이동
 
 
-## 임시 향후 삭제 
-def withdraw_final(request):
-    """
-    회원 탈퇴 완료 페이지 (임시 버전).
-    나중에 템플릿 만들어서 render로 바꿔도 됨.
-    """
-    return HttpResponse("회원 탈퇴가 완료되었습니다. (임시 페이지)")
